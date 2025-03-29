@@ -29,11 +29,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
 
     #[ORM\Column(length: 20)]
     #[Assert\NotBlank]
-    #[Assert\Regex(pattern: "/^\+?[0-9]{10,15}$/", message: "Numéro de téléphone invalide")]
     private ?string $phoneNumber = null;
 
-    #[ORM\Column]
-    private ?bool $isVerified = false;
+    #[ORM\Column(type: 'boolean')]
+    private bool $isVerified = false;
 
     #[ORM\ManyToMany(targetEntity: Role::class, inversedBy: "users")]
     #[ORM\JoinTable(name: "user_roles")]
@@ -83,7 +82,7 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    public function isVerified(): ?bool
+    public function isVerified(): bool
     {
         return $this->isVerified;
     }
@@ -94,34 +93,18 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         return $this;
     }
 
-    // New methods for UserInterface
-    public function getUserIdentifier(): string
+    public function getRoles(): array
     {
-        return $this->email;
+        $roleNames = $this->roles->map(fn (Role $role) => $role->getName())->toArray();
+        if (empty($roleNames)) {
+            $roleNames[] = 'ROLE_USER'; // Rôle par défaut
+        }
+        return array_unique($roleNames);
     }
 
     public function eraseCredentials(): void
     {
-        // If you store any temporary, sensitive data on the user, clear it here
-    }
-
-    public function getRoles(): array
-    {
-        // Convert Role objects to role names
-        $roleNames = $this->roles->map(function($role) {
-            return $role->getName();
-        })->toArray();
-
-        // Ensure every user has at least ROLE_USER
-        $roleNames[] = 'ROLE_USER';
-        
-        return array_unique($roleNames);
-    }
-
-    public function getSalt(): ?string
-    {
-        // Not needed for modern password hashing, return null
-        return null;
+        // Supprimer des données sensibles si nécessaire
     }
 
     public function addRole(Role $role): static
@@ -129,7 +112,6 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
         if (!$this->roles->contains($role)) {
             $this->roles->add($role);
         }
-        
         return $this;
     }
 
@@ -137,5 +119,10 @@ class User implements UserInterface, PasswordAuthenticatedUserInterface
     {
         $this->roles->removeElement($role);
         return $this;
+    }
+
+    public function getUserIdentifier(): string
+    {
+        return $this->email;
     }
 }

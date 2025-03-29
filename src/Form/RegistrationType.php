@@ -8,6 +8,7 @@ use Symfony\Component\Form\Extension\Core\Type\EmailType;
 use Symfony\Component\Form\Extension\Core\Type\PasswordType;
 use Symfony\Component\Form\Extension\Core\Type\TelType;
 use Symfony\Component\Form\Extension\Core\Type\SubmitType;
+use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\OptionsResolver\OptionsResolver;
 use Symfony\Component\Validator\Constraints as Assert;
 
@@ -34,11 +35,17 @@ class RegistrationType extends AbstractType
                 'label' => 'Numéro de téléphone',
                 'constraints' => [
                     new Assert\NotBlank(),
-                    new Assert\Regex([
-                        'pattern' => "/^\+?[0-9]{10,15}$/",
-                        'message' => 'Numéro de téléphone invalide.',
-                    ]),
                 ]
+            ])
+            ->add('roleChoice', ChoiceType::class, [  // Changed from 'role' to 'roleChoice'
+                'mapped' => false,  // This field is not mapped to the User entity
+                'choices' => [
+                    'Acheteur' => 'ROLE_USER',
+                    'Vendeur' => 'ROLE_ADMIN',
+                ],
+                'expanded' => true,
+                'multiple' => false,
+                'label' => 'Choisissez votre rôle'
             ])
             ->add('submit', SubmitType::class, [
                 'label' => 'S\'inscrire',

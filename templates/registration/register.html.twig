@@ -5,10 +5,20 @@
 
 {% block body %}
     <h1>Inscription</h1>
- {{ form_start(registrationForm) }}
-    {{ form_row(registrationForm.email) }}
-    {{ form_row(registrationForm.password) }}
-    {{ form_row(registrationForm.phoneNumber) }}
-    {{ form_row(registrationForm.submit) }}
-{{ form_end(registrationForm) }}
+
+    {% for flash_error in app.flashes('error') %}
+        <div class="alert alert-danger">{{ flash_error }}</div>
+    {% endfor %}
+
+    {% for flash_success in app.flashes('success') %}
+        <div class="alert alert-success">{{ flash_success }}</div>
+    {% endfor %}
+
+    {{ form_start(registrationForm, {'attr': {'method': 'POST'}}) }}
+        {{ form_row(registrationForm.email) }}
+        {{ form_row(registrationForm.password) }}
+        {{ form_row(registrationForm.phoneNumber) }}
+      {{ form_row(registrationForm.roleChoice) }} {# Ajout du champ role #}
+        {{ form_row(registrationForm.submit) }}
+    {{ form_end(registrationForm) }}
 {% endblock %}
