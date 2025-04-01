@@ -1,7 +1,9 @@
 
 ###> symfony/framework-bundle ###
 /.env.local
-/.env.local.php
+/.env.local.php###> symfony/monolog-bundle ###
+/logs/
+###< symfony/monolog-bundle ###
 /.env.*.local
 /config/secrets/prod/prod.decrypt.private.php
 /public/bundles/
