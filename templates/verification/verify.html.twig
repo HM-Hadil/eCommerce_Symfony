@@ -1,0 +1,124 @@
+{# templates/verification/verify.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Vérification du téléphone{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .otp-input {
+            letter-spacing: 2px;
+            font-size: 1.5rem;
+            text-align: center;
+        }
+        .otp-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .countdown {
+            font-size: 0.9rem;
+            color: #6c757d;
+            margin-top: 10px;
+            text-align: center;
+        }
+        .resend-btn {
+            display: none;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container otp-container">
+    <div class="card shadow-sm mt-5">
+        <div class="card-body">
+            <h2 class="card-title text-center mb-4">Vérifiez votre téléphone</h2>
+            
+            {% for flash_type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            
+            <div class="alert alert-info text-center">
+                Un code à 6 chiffres a été envoyé au <strong>{{ phone }}</strong>
+            </div>
+
+            {{ form_start(form, {'attr': {'class': 'needs-validation', 'novalidate': 'novalidate'}}) }}
+                <div class="mb-3">
+                    {{ form_label(form.code, 'Entrez le code de vérification', {'label_attr': {'class': 'form-label'}}) }}
+                    {{ form_widget(form.code, {
+                        'attr': {
+                            'class': 'form-control otp-input',
+                            'autocomplete': 'one-time-code',
+                            'inputmode': 'numeric',
+                            'autofocus': 'autofocus'
+                        }
+                    }) }}
+                    {{ form_errors(form.code) }}
+                </div>
+
+                <button type="submit" class="btn btn-primary w-100 py-2">
+                    Vérifier
+                </button>
+            {{ form_end(form) }}
+
+            <div class="text-center mt-3">
+                <div class="countdown" id="countdown">Le code expire dans: <span id="timer">10:00</span></div>
+                <a href="{{ path('app_resend_otp') }}" class="btn btn-link text-muted resend-btn" id="resendBtn">
+                    Vous n'avez pas reçu le code? Renvoyer
+                </a>
+            </div>
+
+            {% if error %}
+                <div class="alert alert-danger mt-3">{{ error.messageKey|trans(error.messageData, 'security') }}</div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+<script>
+// Auto-submit when 6 digits are entered
+document.querySelector('.otp-input').addEventListener('input', function(e) {
+    // Remove non-numeric characters
+    this.value = this.value.replace(/[^0-9]/g, '');
+    
+    // Auto-submit when 6 digits are entered
+    if (this.value.length === 6) {
+        this.form.submit();
+    }
+});
+
+// OTP countdown timer
+(function() {
+    const timerElement = document.getElementById('timer');
+    const resendBtn = document.getElementById('resendBtn');
+    
+    // Start with 10 minutes (600 seconds)
+    let timeLeft = 600;
+    
+    function updateTimer() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        
+        // Display time in MM:SS format
+        timerElement.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        
+        if (timeLeft <= 0) {
+            // Time's up, show the resend button
+            clearInterval(timerId);
+            document.getElementById('countdown').textContent = 'Le code a expiré.';
+            resendBtn.style.display = 'inline-block';
+        } else {
+            timeLeft--;
+        }
+    }
+    
+    // Update the timer every second
+    updateTimer();
+    const timerId = setInterval(updateTimer, 1000);
+})();
+</script>
+{% endblock %}

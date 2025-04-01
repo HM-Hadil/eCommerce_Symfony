@@ -1,9 +1,11 @@
 <?php
+
 namespace App\Controller;
 
 use App\Entity\User;
 use App\Entity\Role;
 use App\Form\RegistrationType;
+use App\Service\OtpService;
 use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
@@ -14,8 +16,8 @@ use Psr\Log\LoggerInterface;
 
 class RegistrationController extends AbstractController
 {
-    private $logger;
-    
+    private LoggerInterface $logger;
+
     public function __construct(LoggerInterface $logger)
     {
         $this->logger = $logger;
@@ -25,56 +27,105 @@ class RegistrationController extends AbstractController
     public function register(
         Request $request,
         EntityManagerInterface $entityManager,
-        UserPasswordHasherInterface $passwordHasher
+        UserPasswordHasherInterface $passwordHasher,
+        OtpService $otpService
     ): Response {
+        // Redirection si l'utilisateur est déjà connecté
+        if ($this->getUser()) {
+            return $this->redirectToRoute('app_home');
+        }
+
         $user = new User();
         $form = $this->createForm(RegistrationType::class, $user);
         
-        $this->logger->info('Form submission method: ' . $request->getMethod());
-        
+        $this->logger->info('Tentative d\'inscription', [
+            'ip' => $request->getClientIp(),
+            'method' => $request->getMethod(),
+        ]);
+
         $form->handleRequest($request);
-        
-        if ($form->isSubmitted() && $form->isValid()) {
-            $this->logger->info('Form is submitted and valid');
-            
-            try {
-                // Hash the password
-                $hashedPassword = $passwordHasher->hashPassword($user, $user->getPassword());
-                $user->setPassword($hashedPassword);
-                $user->setIsVerified(false);
-                
-                // Get the selected role from the form (note the field name change)
-                $roleName = $form->get('roleChoice')->getData();
-                
-                // Find or create the role
-                $role = $entityManager->getRepository(Role::class)->findOneBy(['name' => $roleName]);
-                
-                if (!$role) {
-                    $role = new Role();
-                    $role->setName($roleName);
-                    $entityManager->persist($role);
+
+        if ($form->isSubmitted()) {
+            $this->logger->info('Formulaire soumis', [
+                'valid' => $form->isValid(),
+                'email' => $user->getEmail(),
+            ]);
+
+            if ($form->isValid()) {
+                try {
+                    // 🔹 1. Hachage du mot de passe
+                    $hashedPassword = $passwordHasher->hashPassword($user, $user->getPassword());
+                    $user->setPassword($hashedPassword);
+                    $user->setIsVerified(false);
+
+                    // 🔹 2. Attribution du rôle
+                    $roleChoice = $form->has('roleChoice') ? $form->get('roleChoice')->getData() : null;
+
+                    if ($roleChoice) {
+                        $role = $entityManager->getRepository(Role::class)->findOneBy(['name' => $roleChoice]);
+
+                        if (!$role) {
+                            $role = new Role();
+                            $role->setName($roleChoice);
+                            $entityManager->persist($role);
+                        }
+                        $user->addUserRole($role);
+                    }
+
+                    // 🔹 3. Formatage du numéro de téléphone
+                    $phoneNumber = trim($user->getPhoneNumber());
+
+                    if (!str_starts_with($phoneNumber, '+')) {
+                        if (str_starts_with($phoneNumber, '0')) {
+                            $phoneNumber = '+216' . substr($phoneNumber, 1);
+                        } else {
+                            $phoneNumber = '+216' . $phoneNumber;
+                        }
+                    }
+                    $user->setPhoneNumber($phoneNumber);
+
+                    // 🔹 4. Génération et envoi de l'OTP
+                    $otpService->generateOtp($user);
+
+                    // 🔹 5. Persistance en base de données
+                    $entityManager->persist($user);
+                    $entityManager->flush();
+
+                    // 🔹 6. Stockage de l'ID utilisateur pour vérification OTP
+                    $session = $request->getSession();
+                    $session->set('otp_user_id', $user->getId());
+                    $session->set('otp_verified_redirect', 'login');
+
+                    // 🔹 7. Journalisation et redirection
+                    $this->logger->info('Utilisateur inscrit avec succès', [
+                        'user_id' => $user->getId(),
+                        'email' => $user->getEmail(),
+                        'phone' => $user->getPhoneNumber(),
+                    ]);
+
+                    $this->addFlash('success', 'Un code de vérification a été envoyé à votre numéro de téléphone.');
+                    return $this->redirectToRoute('app_login');
+
+                } catch (\Throwable $e) {
+                    // Gestion des erreurs avec journalisation détaillée
+                    $this->logger->error('Erreur lors de l\'inscription', [
+                        'error' => $e->getMessage(),
+                        'trace' => $e->getTraceAsString(),
+                    ]);
+
+                    $this->addFlash('error', 'Inscription échouée. Veuillez réessayer.');
                 }
-                
-                // Add the role to the user
-                $user->addRole($role);
-                
-                $entityManager->persist($user);
-                $entityManager->flush();
-                
-                $this->addFlash('success', 'Votre compte a été créé avec succès');
-                return $this->redirectToRoute('app_home');
-                
-            } catch (\Exception $e) {
-                $this->logger->error('Error during registration: ' . $e->getMessage());
-                $this->addFlash('error', 'Une erreur est survenue lors de l\'inscription');
-            }
-        } elseif ($form->isSubmitted()) {
-            $errors = $form->getErrors(true);
-            foreach ($errors as $error) {
-                $this->addFlash('error', $error->getMessage());
+            } else {
+                // 🔹 Gestion des erreurs du formulaire
+                $errors = [];
+                foreach ($form->getErrors(true) as $error) {
+                    $errors[] = $error->getMessage();
+                    $this->addFlash('error', $error->getMessage());
+                }
+                $this->logger->warning('Échec de la validation du formulaire', ['errors' => $errors]);
             }
         }
-        
+
         return $this->render('registration/register.html.twig', [
             'registrationForm' => $form->createView(),
         ]);
