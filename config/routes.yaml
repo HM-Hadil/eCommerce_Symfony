@@ -3,6 +3,7 @@ controllers:
         path: ../src/Controller/
         namespace: App\Controller
     type: attribute
+
 app_verify_otp:
     path: /verify
     controller: App\Controller\VerificationController::verify
@@ -12,3 +13,11 @@ app_resend_otp:
     path: /resend-otp
     controller: App\Controller\VerificationController::resendOtp
     methods: [GET] 
+
+app_login:
+    path: /login
+    controller: App\Controller\SecurityController::login
+
+app_logout:
+    path: /logout
+    controller: App\Controller\SecurityController::logout

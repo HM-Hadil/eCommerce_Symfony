@@ -1,0 +1,80 @@
+{# templates/security/login.html.twig #}
+{% extends 'base.html.twig' %}
+
+{% block title %}Connexion{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        .login-container {
+            max-width: 400px;
+            margin: 0 auto;
+        }
+        .form-floating {
+            margin-bottom: 1rem;
+        }
+        .btn-login {
+            font-size: 0.9rem;
+            letter-spacing: 0.05rem;
+            padding: 0.75rem 1rem;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container login-container">
+    <div class="card shadow-sm mt-5">
+        <div class="card-body p-4">
+            <h2 class="card-title text-center mb-4">Connexion</h2>
+            
+            {% for flash_type, messages in app.flashes %}
+                {% for message in messages %}
+                    <div class="alert alert-{{ flash_type }} alert-dismissible fade show" role="alert">
+                        {{ message }}
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                {% endfor %}
+            {% endfor %}
+            
+            {% if error %}
+                <div class="alert alert-danger">
+                    {{ error.messageKey|trans(error.messageData, 'security') }}
+                </div>
+            {% endif %}
+
+            <form method="post" action="{{ path('app_login') }}">
+                <input type="hidden" name="_csrf_token" value="{{ csrf_token('authenticate') }}">
+
+                <div class="form-floating mb-3">
+                    <input type="email" class="form-control" id="inputEmail" name="_username" value="{{ last_username }}" placeholder="exemple@domaine.com" required autofocus>
+                    <label for="inputEmail">Adresse email</label>
+                </div>
+
+                <div class="form-floating mb-3">
+                    <input type="password" class="form-control" id="inputPassword" name="_password" placeholder="Mot de passe" required>
+                    <label for="inputPassword">Mot de passe</label>
+                </div>
+
+                <div class="form-check mb-3">
+                    <input class="form-check-input" type="checkbox" id="rememberMe" name="_remember_me">
+                    <label class="form-check-label" for="rememberMe">
+                        Se souvenir de moi
+                    </label>
+                </div>
+
+                <div class="d-grid mb-3">
+                    <button class="btn btn-primary btn-login fw-bold" type="submit">
+                        Se connecter
+                    </button>
+                </div>
+
+                <div class="text-center">
+                    <a href="{{ path('app_register') }}" class="text-decoration-none">
+                        Vous n'avez pas de compte ? Inscrivez-vous
+                    </a>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+{% endblock %}
