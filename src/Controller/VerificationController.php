@@ -74,12 +74,11 @@ class VerificationController extends AbstractController
                 
                 $this->addFlash('success', 'Votre compte a été vérifié avec succès. Vous pouvez maintenant vous connecter.');
 
-                // Redirect after verification
-                $redirectRoute = $request->getSession()->get('otp_verified_redirect', 'app_login');
-                return $this->redirectToRoute($redirectRoute, [
-                    'email' => $user->getEmail(),
-                    'verified' => 1
-                ]);
+                // Toujours rediriger vers la page de connexion après une vérification réussie
+                $session = $request->getSession();
+                $session->set(SecurityRequestAttributes::LAST_USERNAME, $user->getEmail());
+                $session->set('verified', 1);
+                return $this->redirectToRoute('app_login');
             }
 
             $this->logger->warning('Invalid OTP code entered', [
