@@ -94,7 +94,8 @@ class RegistrationController extends AbstractController
                     // 🔹 6. Stockage de l'ID utilisateur pour vérification OTP
                     $session = $request->getSession();
                     $session->set('otp_user_id', $user->getId());
-                    $session->set('otp_verified_redirect', 'login');
+                    // Modification pour rediriger vers la page de vérification
+                    $session->set('otp_verified_redirect', 'verify');
 
                     // 🔹 7. Journalisation et redirection
                     $this->logger->info('Utilisateur inscrit avec succès', [
@@ -104,7 +105,8 @@ class RegistrationController extends AbstractController
                     ]);
 
                     $this->addFlash('success', 'Un code de vérification a été envoyé à votre numéro de téléphone.');
-                    return $this->redirectToRoute('app_login');
+                    // Redirection vers la page de vérification au lieu de la page de connexion
+                    return $this->redirectToRoute('app_verify_otp');
 
                 } catch (\Throwable $e) {
                     // Gestion des erreurs avec journalisation détaillée

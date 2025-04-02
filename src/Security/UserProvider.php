@@ -36,12 +36,12 @@ class UserProvider implements UserProviderInterface, PasswordUpgraderInterface
             throw $ex;
         }
 
-        if (!$user->isIsVerified()) {
+        if (!$user->isVerified()) {
             $this->logger->warning('User not verified', ['email' => $identifier]);
             throw new \Exception('Votre compte n\'est pas vérifié. Veuillez vérifier votre téléphone.');
         }
 
-        if (!$user->isIsActive()) {
+        if (!$user->isActive()) {
             $this->logger->warning('User account disabled', ['email' => $identifier]);
             throw new \Exception('Votre compte est désactivé. Veuillez contacter l\'administrateur.');
         }

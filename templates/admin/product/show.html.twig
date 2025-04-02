@@ -1,0 +1,164 @@
+{# templates/admin/product/show.html.twig #}
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Détails produit{% endblock %}
+
+{% block body %}
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Détails du produit</h1>
+        <div>
+            <a href="{{ path('app_admin_product_index') }}" class="btn btn-secondary me-2">
+                <i class="fas fa-arrow-left me-1"></i> Retour à la liste
+            </a>
+            <a href="{{ path('app_admin_product_edit', {'id': product.id}) }}" class="btn btn-warning me-2">
+                <i class="fas fa-edit me-1"></i> Modifier
+            </a>
+            <button type="button" class="btn btn-danger" data-bs-toggle="modal" data-bs-target="#deleteModal">
+                <i class="fas fa-trash me-1"></i> Supprimer
+            </button>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-image me-2"></i>Image
+                </div>
+                <div class="card-body text-center">
+                    {% if product.image %}
+                        <img src="{{ vich_uploader_asset(product, 'imageFile') }}" alt="{{ product.name }}" class="img-fluid rounded">
+                    {% else %}
+                        <div class="alert alert-secondary py-5">
+                            <i class="fas fa-image fa-3x mb-3"></i>
+                            <p>Aucune image disponible</p>
+                        </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-info text-white">
+                    <i class="fas fa-info-circle me-2"></i>Informations sur le produit
+                </div>
+                <div class="card-body">
+                    <table class="table">
+                        <tbody>
+                            <tr>
+                                <th style="width: 30%">ID</th>
+                                <td>{{ product.id }}</td>
+                            </tr>
+                            <tr>
+                                <th>Nom</th>
+                                <td>{{ product.name }}</td>
+                            </tr>
+                            <tr>
+                                <th>Description</th>
+                                <td>{{ product.description ? product.description|nl2br : 'Aucune description' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Prix</th>
+                                <td>{{ product.price|number_format(2, ',', ' ') }} €</td>
+                            </tr>
+                            <tr>
+                                <th>Stock</th>
+                                <td>
+                                    {% if product.stock > 10 %}
+                                        <span class="badge bg-success">{{ product.stock }} unités</span>
+                                    {% elseif product.stock > 0 %}
+                                        <span class="badge bg-warning">{{ product.stock }} unités</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Rupture de stock</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Catégorie</th>
+                                <td>
+                                    {% if product.category %}
+                                        <a href="{{ path('app_admin_category_show', {'id': product.category.id}) }}">
+                                            {{ product.category.name }}
+                                        </a>
+                                    {% else %}
+                                        <span class="badge bg-secondary">Non catégorisé</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                            <tr>
+                                <th>Créé le</th>
+                               <td>{{ product.createdAt ? product.createdAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Mis à jour le</th>
+                                <td>{{ product.updatedAt ? product.updatedAt|date('d/m/Y H:i') : 'N/A' }}</td>
+                            </tr>
+                            <tr>
+                                <th>Status</th>
+                                <td>
+                                    {% if product.isActive %}
+                                        <span class="badge bg-success">Actif</span>
+                                    {% else %}
+                                        <span class="badge bg-danger">Inactif</span>
+                                    {% endif %}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    {% if product.features|length > 0 %}
+    <div class="card mb-4">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-list-check me-2"></i>Caractéristiques
+        </div>
+        <div class="card-body">
+            <div class="table-responsive">
+                <table class="table table-striped">
+                    <thead>
+                        <tr>
+                            <th>Nom</th>
+                            <th>Valeur</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for feature in product.features %}
+                        <tr>
+                            <td>{{ feature.name }}</td>
+                            <td>{{ feature.value }}</td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Modal de confirmation de suppression -->
+    <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header bg-danger text-white">
+                    <h5 class="modal-title" id="deleteModalLabel">Confirmer la suppression</h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <p>Êtes-vous sûr de vouloir supprimer le produit <strong>{{ product.name }}</strong> ?</p>
+                    <p class="text-danger"><i class="fas fa-exclamation-triangle me-1"></i> Cette action est irréversible.</p>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Annuler</button>
+                    <form method="post" action="{{ path('app_admin_product_delete', {'id': product.id}) }}" style="display: inline-block;">
+                        <input type="hidden" name="_token" value="{{ csrf_token('delete' ~ product.id) }}">
+                        <button class="btn btn-danger">Confirmer la suppression</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

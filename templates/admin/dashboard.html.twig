@@ -1,0 +1,79 @@
+{# templates/admin/dashboard.html.twig #}
+{% extends 'admin/base.html.twig' %}
+
+{% block title %}Tableau de bord administrateur{% endblock %}
+
+{% block body %}
+    <div class="bg-light p-4 rounded">
+        <h1 class="display-6">Bienvenue, {{ app.user.email }}</h1>
+        <p class="lead">Gérez vos produits et catégories depuis ce tableau de bord.</p>
+    </div>
+
+    <div class="row mt-4">
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <i class="fas fa-box me-2"></i>Produits
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ productsCount }} produits</h5>
+                    <p class="card-text">Gérez vos produits en cours.</p>
+                    <a href="{{ path('app_admin_product_index') }}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>Voir tous les produits
+                    </a>
+                    <a href="{{ path('app_admin_product_new') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Ajouter un produit
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-6">
+            <div class="card mb-4">
+                <div class="card-header bg-success text-white">
+                    <i class="fas fa-list me-2"></i>Catégories
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">{{ categoriesCount }} catégories</h5>
+                    <p class="card-text">Organisez vos produits par catégories.</p>
+                    <a href="{{ path('app_admin_category_index') }}" class="btn btn-primary">
+                        <i class="fas fa-list me-2"></i>Voir toutes les catégories
+                    </a>
+                    <a href="{{ path('app_admin_category_new') }}" class="btn btn-success">
+                        <i class="fas fa-plus me-2"></i>Ajouter une catégorie
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="card mt-4">
+        <div class="card-header bg-info text-white">
+            <i class="fas fa-info-circle me-2"></i>Informations utilisateur
+        </div>
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md-6">
+                    <p><strong>Email :</strong> {{ app.user.email }}</p>
+                    <p><strong>Rôle :</strong> {{ app.user.roles ? app.user.roles[0]|replace({'ROLE_': ''}) : 'Utilisateur' }}</p>
+                </div>
+                <div class="col-md-6">
+                    <p><strong>Compte vérifié :</strong> 
+                        {% if app.user.isVerified %}
+                            <span class="badge bg-success">Oui</span>
+                        {% else %}
+                            <span class="badge bg-danger">Non</span>
+                        {% endif %}
+                    </p>
+                    <p><strong>Compte actif :</strong>
+                        {% if app.user.isActive %}
+                            <span class="badge bg-success">Oui</span>
+                        {% else %}
+                            <span class="badge bg-danger">Non</span>
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
