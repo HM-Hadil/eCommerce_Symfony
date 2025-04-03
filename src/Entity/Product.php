@@ -6,7 +6,7 @@ use App\Repository\ProductRepository;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\HttpFoundation\File\File;
 use Vich\UploaderBundle\Mapping\Annotation as Vich;
-
+ 
 #[ORM\Entity(repositoryClass: ProductRepository::class)]
 #[Vich\Uploadable]
 class Product
@@ -46,6 +46,7 @@ class Product
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+    private bool $isActive = true;
 
     public function __construct()
     {
@@ -56,6 +57,18 @@ class Product
     {
         return $this->id;
     }
+    // Add these methods
+public function isActive(): bool
+{
+    return $this->isActive;
+}
+
+public function setIsActive(bool $isActive): static
+{
+    $this->isActive = $isActive;
+    
+    return $this;
+}
 
     public function getName(): ?string
     {

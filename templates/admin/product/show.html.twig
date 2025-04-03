@@ -111,33 +111,7 @@
         </div>
     </div>
 
-    {% if product.features|length > 0 %}
-    <div class="card mb-4">
-        <div class="card-header bg-info text-white">
-            <i class="fas fa-list-check me-2"></i>Caractéristiques
-        </div>
-        <div class="card-body">
-            <div class="table-responsive">
-                <table class="table table-striped">
-                    <thead>
-                        <tr>
-                            <th>Nom</th>
-                            <th>Valeur</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {% for feature in product.features %}
-                        <tr>
-                            <td>{{ feature.name }}</td>
-                            <td>{{ feature.value }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-        </div>
-    </div>
-    {% endif %}
+
 
     <!-- Modal de confirmation de suppression -->
     <div class="modal fade" id="deleteModal" tabindex="-1" aria-labelledby="deleteModalLabel" aria-hidden="true">

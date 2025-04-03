@@ -1,8 +1,6 @@
-controllers:
-    resource:
-        path: ../src/Controller/
-        namespace: App\Controller
-    type: attribute
+app_home:
+    path: /
+    controller: App\Controller\HomeController::index
 
 app_verify_otp:
     path: /verify
@@ -12,8 +10,8 @@ app_verify_otp:
 app_resend_otp:
     path: /resend-otp
     controller: App\Controller\VerificationController::resendOtp
-    methods: [GET] 
-
+    methods: [GET]
+ 
 app_login:
     path: /login
     controller: App\Controller\SecurityController::login
@@ -21,3 +19,59 @@ app_login:
 app_logout:
     path: /logout
     controller: App\Controller\SecurityController::logout
+
+app_admin_dashboard:
+    path: /admin
+    controller: App\Controller\Admin\DashboardController::index
+
+# Add the category routes with proper indentation
+app_admin_category_index:
+    path: /admin/category
+    controller: App\Controller\Admin\CategoryController::index
+    methods: [GET]
+
+app_admin_category_new:
+    path: /admin/category/new
+    controller: App\Controller\Admin\CategoryController::new
+    methods: [GET, POST]
+
+app_admin_category_show:
+    path: /admin/category/{id}
+    controller: App\Controller\Admin\CategoryController::show
+    methods: [GET]
+
+app_admin_category_edit:
+    path: /admin/category/{id}/edit
+    controller: App\Controller\Admin\CategoryController::edit
+    methods: [GET, POST]
+
+app_admin_category_delete:
+    path: /admin/category/{id}
+    controller: App\Controller\Admin\CategoryController::delete
+    methods: [POST]
+
+    # Product routes
+app_admin_product_index:
+    path: /admin/product
+    controller: App\Controller\Admin\ProductController::index
+    methods: [GET]
+
+app_admin_product_new:
+    path: /admin/product/new
+    controller: App\Controller\Admin\ProductController::new
+    methods: [GET, POST]
+
+app_admin_product_show:
+    path: /admin/product/{id}
+    controller: App\Controller\Admin\ProductController::show
+    methods: [GET]
+
+app_admin_product_edit:
+    path: /admin/product/{id}/edit
+    controller: App\Controller\Admin\ProductController::edit
+    methods: [GET, POST]
+
+app_admin_product_delete:
+    path: /admin/product/{id}
+    controller: App\Controller\Admin\ProductController::delete
+    methods: [POST]
