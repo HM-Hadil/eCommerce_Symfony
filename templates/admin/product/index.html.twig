@@ -35,11 +35,12 @@
                         <tr>
                             <td>{{ product.id }}</td>
                             <td>
-                                {% if product.image %}
-                                    <img src="{{ vich_uploader_asset(product, 'imageFile') }}" alt="{{ product.name }}" class="img-thumbnail" style="max-width: 50px;">
-                                {% else %}
-                                    <span class="badge bg-secondary">Pas d'image</span>
-                                {% endif %}
+                           {% if product.image %}
+    <img src="{{ vich_uploader_asset(product, 'imageFile') }}" alt="{{ product.name }}" class="img-thumbnail" style="max-width: 50px;">
+{% else %}
+    <span class="badge bg-secondary">Pas d'image</span>
+{% endif %}
+
                             </td>
                             <td>{{ product.name }}</td>
                             <td>{{ product.price|number_format(2, ',', ' ') }} €</td>

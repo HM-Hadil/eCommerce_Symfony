@@ -37,15 +37,14 @@ class ProductType extends AbstractType
                 'label' => 'Stock disponible',
                 'attr' => ['class' => 'form-control', 'min' => 0]
             ])
-            ->add('imageFile', VichImageType::class, [
-                'label' => 'Image du produit',
-                'required' => false,
-                'allow_delete' => true,
-                'download_uri' => false,
-                'image_uri' => true,
-                'asset_helper' => true,
-                'attr' => ['class' => 'form-control']
-            ])
+         
+->add('imageFile', VichImageType::class, [
+    'label' => 'Image du produit',
+    'required' => false,
+    'allow_delete' => true,
+    'download_uri' => false,
+    'image_uri' => true,
+])
             ->add('category', EntityType::class, [
                 'class' => Category::class,
                 'choice_label' => 'name',

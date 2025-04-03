@@ -1,6 +1,8 @@
 security:
     password_hashers:
-        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface: 'auto'
+        Symfony\Component\Security\Core\User\PasswordAuthenticatedUserInterface:
+            algorithm: auto
+            # Autres paramètres de hashage...
 
     providers:
         app_user_provider:
@@ -10,22 +12,24 @@ security:
         dev:
             pattern: ^/(_(profiler|wdt)|css|images|js)/
             security: false
-
-        login:
-            pattern: ^/login
-            stateless: true
-            provider: app_user_provider
-            form_login:
-                login_path: app_login
-                check_path: app_login
-                username_parameter: email
-                password_parameter: password
-
+            
         main:
             lazy: true
             provider: app_user_provider
-            form_login:
-                login_path: app_login
+            custom_authenticator: App\Security\LoginFormAuthenticator
+            logout:
+                path: app_logout
+                target: app_login
+                
+            remember_me:
+                secret: '%kernel.secret%'
+                lifetime: 604800 # 1 semaine
+                
+            # Supprimer la configuration form_login car elle entre en conflit avec custom_authenticator
+            
     access_control:
         - { path: ^/admin, roles: ROLE_ADMIN }
         - { path: ^/login, roles: PUBLIC_ACCESS }
+        - { path: ^/verify, roles: PUBLIC_ACCESS }
+        - { path: ^/resend-otp, roles: PUBLIC_ACCESS }
+        # Autres règles d'accès...

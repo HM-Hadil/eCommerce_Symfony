@@ -54,9 +54,17 @@ class LoginFormAuthenticator extends AbstractLoginFormAuthenticator
 
     public function onAuthenticationSuccess(Request $request, TokenInterface $token, string $firewallName): ?RedirectResponse
     {
-        // Clear any stored target path to prevent conflicts
-        $this->clearTargetPath($request->getSession(), $firewallName);
+        $user = $token->getUser();
+        $roles = $user instanceof UserInterface ? $user->getRoles() : [];
         
+        $this->logger->info('Authentication success debug info', [
+            'email' => $user instanceof UserInterface ? $user->getUserIdentifier() : 'unknown',
+            'roles' => $roles,
+            'has_admin_role' => in_array('ROLE_ADMIN', $roles),
+            'firewall_name' => $firewallName
+        ]);
+        // Clear any stored target path to prevent conflicts
+        $this->removeTargetPath($request->getSession(), $firewallName);        
         $user = $token->getUser();
         
         $this->logger->info('User authenticated successfully', [
