@@ -34,4 +34,28 @@ class ProductRepository extends ServiceEntityRepository
             ->getQuery()
             ->getResult();
     }
+
+
+     /**
+     * Find products with filters
+     */
+    public function findByFilters(?string $search = null, ?Category $category = null)
+    {
+        $qb = $this->createQueryBuilder('p')
+            ->where('p.isActive = :active')
+            ->setParameter('active', true)
+            ->orderBy('p.createdAt', 'DESC');
+        
+        if ($category) {
+            $qb->andWhere('p.category = :category')
+               ->setParameter('category', $category);
+        }
+        
+        if ($search) {
+            $qb->andWhere('p.name LIKE :search OR p.description LIKE :search')
+               ->setParameter('search', '%'.$search.'%');
+        }
+        
+        return $qb;
+    }
 }

@@ -1,6 +1,14 @@
+
+
 app_home:
     path: /
     controller: App\Controller\HomeController::index
+
+# Gardez vos routes existantes et ajoutez simplement celle-ci
+app_register:
+    path: /register
+    controller: App\Controller\RegistrationController::register
+    methods: [GET, POST]
 
 app_verify_otp:
     path: /verify

@@ -46,6 +46,8 @@ class Product
 
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
+    
+    #[ORM\Column(type: 'boolean', options: ["default" => true])]
     private bool $isActive = true;
 
     public function __construct()
@@ -57,18 +59,18 @@ class Product
     {
         return $this->id;
     }
-    // Add these methods
-public function isActive(): bool
-{
-    return $this->isActive;
-}
 
-public function setIsActive(bool $isActive): static
-{
-    $this->isActive = $isActive;
-    
-    return $this;
-}
+    public function isActive(): bool
+    {
+        return $this->isActive;
+    }
+
+    public function setIsActive(bool $isActive): static
+    {
+        $this->isActive = $isActive;
+        
+        return $this;
+    }
 
     public function getName(): ?string
     {
