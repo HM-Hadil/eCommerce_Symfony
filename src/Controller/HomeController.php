@@ -48,13 +48,14 @@ class HomeController extends AbstractController
             $queryBuilder->andWhere('p.name LIKE :search OR p.description LIKE :search')
                 ->setParameter('search', '%'.$search.'%');
         }
-        
+        $limit = $request->query->get('limit', 12); 
         // Créer la pagination
         $pagination = $paginator->paginate(
-            $queryBuilder->getQuery(),
-            $request->query->getInt('page', 1), // Numéro de page, 1 par défaut
-            12 // Nombre d'éléments par page
+            $queryBuilder,
+            $request->query->getInt('page', 1),
+            $limit
         );
+        
         
         // Récupérer toutes les catégories pour le filtre
         $categories = $categoryRepository->findAll();
