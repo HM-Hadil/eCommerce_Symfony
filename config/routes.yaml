@@ -1,10 +1,14 @@
-
+controllers:
+    resource:
+        path: ../src/Controller/
+        namespace: App\Controller
+    type: attribute
 
 app_home:
     path: /
     controller: App\Controller\HomeController::index
 
-# Gardez vos routes existantes et ajoutez simplement celle-ci
+# Registration and Authentication Routes
 app_register:
     path: /register
     controller: App\Controller\RegistrationController::register
@@ -28,11 +32,23 @@ app_logout:
     path: /logout
     controller: App\Controller\SecurityController::logout
 
+# Product Routes (Frontend)
+app_product_index:
+    path: /products
+    controller: App\Controller\ProductController::index
+    methods: [GET]
+
+app_product_show:
+    path: /products/{id}
+    controller: App\Controller\ProductController::show
+    methods: [GET]
+
+# Admin Routes
 app_admin_dashboard:
     path: /admin
     controller: App\Controller\Admin\DashboardController::index
 
-# Add the category routes with proper indentation
+# Admin Category Routes
 app_admin_category_index:
     path: /admin/category
     controller: App\Controller\Admin\CategoryController::index
@@ -58,7 +74,7 @@ app_admin_category_delete:
     controller: App\Controller\Admin\CategoryController::delete
     methods: [POST]
 
-    # Product routes
+# Admin Product Routes
 app_admin_product_index:
     path: /admin/product
     controller: App\Controller\Admin\ProductController::index
@@ -69,15 +85,15 @@ app_admin_product_new:
     controller: App\Controller\Admin\ProductController::new
     methods: [GET, POST]
 
-app_admin_product_show:
-    path: /admin/product/{id}
-    controller: App\Controller\Admin\ProductController::show
-    methods: [GET]
-
 app_admin_product_edit:
     path: /admin/product/{id}/edit
     controller: App\Controller\Admin\ProductController::edit
     methods: [GET, POST]
+
+app_admin_product_show:
+    path: /admin/product/{id}
+    controller: App\Controller\Admin\ProductController::show
+    methods: [GET]
 
 app_admin_product_delete:
     path: /admin/product/{id}

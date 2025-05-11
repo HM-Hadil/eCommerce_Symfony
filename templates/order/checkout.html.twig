@@ -1,0 +1,134 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Finaliser ma commande{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="mb-4">Finaliser ma commande</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Informations de livraison et paiement</h5>
+                </div>
+                <div class="card-body">
+                    {{ form_start(form) }}
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.shippingAddress) }}
+                                {{ form_widget(form.shippingAddress) }}
+                                {{ form_errors(form.shippingAddress) }}
+                            </div>
+                            <div class="col-md-6 mb-3">
+                                {{ form_label(form.billingAddress) }}
+                                {{ form_widget(form.billingAddress) }}
+                                {{ form_errors(form.billingAddress) }}
+                                <div class="form-check mt-2">
+                                    <input class="form-check-input" type="checkbox" id="sameAsShipping">
+                                    <label class="form-check-label" for="sameAsShipping">
+                                        Identique à l'adresse de livraison
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="payment-methods my-4">
+                            <h5 class="mb-3">{{ form_label(form.paymentMethod) }}</h5>
+                            <div class="bg-light p-3 rounded">
+                                {{ form_widget(form.paymentMethod) }}
+                                {{ form_errors(form.paymentMethod) }}
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ path('app_cart_index') }}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left mr-2"></i>Retour au panier
+                            </a>
+                            <button type="submit" class="btn btn-primary">
+                                <i class="fas fa-credit-card mr-2"></i>Procéder au paiement
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Résumé de la commande</h5>
+                </div>
+                <div class="card-body">
+                    {% for item in cart.cartItems %}
+                        <div class="d-flex justify-content-between mb-2">
+                            <div>
+                                <span class="fw-bold">{{ item.quantity }} x</span> {{ item.product.name }}
+                            </div>
+                            <div>{{ item.subtotal|format_currency('EUR') }}</div>
+                        </div>
+                        {% if not loop.last %}
+                            <hr class="my-2">
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                <div class="card-footer">
+                    <div class="d-flex justify-content-between">
+                        <h5 class="mb-0">Total</h5>
+                        <h5 class="mb-0">{{ cart.total|format_currency('EUR') }}</h5>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% block javascripts %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Copy shipping address to billing address when checkbox is checked
+    const checkbox = document.getElementById('sameAsShipping');
+    const shippingAddress = document.getElementById('checkout_shippingAddress');
+    const billingAddress = document.getElementById('checkout_billingAddress');
+    
+    checkbox.addEventListener('change', function() {
+        if (this.checked) {
+            billingAddress.value = shippingAddress.value;
+            billingAddress.disabled = true;
+        } else {
+            billingAddress.disabled = false;
+        }
+    });
+    
+    // Update billing address if shipping address changes and checkbox is checked
+    shippingAddress.addEventListener('input', function() {
+        if (checkbox.checked) {
+            billingAddress.value = this.value;
+        }
+    });
+    
+    // Show additional fields based on payment method selection
+    const paymentMethods = document.querySelectorAll('input[name="checkout[paymentMethod]"]');
+    
+    paymentMethods.forEach(function(method) {
+        method.addEventListener('change', function() {
+            // Here you could add code to show/hide additional fields based on payment method
+            console.log('Selected payment method:', this.value);
+        });
+    });
+});
+</script>
+{% endblock %}
+{% endblock %}
