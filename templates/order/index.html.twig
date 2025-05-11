@@ -1,0 +1,86 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Mes Commandes{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="mb-4">Mes Commandes</h1>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% if orders|length > 0 %}
+        <div class="table-responsive">
+            <table class="table table-striped">
+                <thead>
+                    <tr>
+                        <th>Référence</th>
+                        <th>Date</th>
+                        <th>Total</th>
+                        <th>Statut</th>
+                        <th>Actions</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for order in orders %}
+                        <tr>
+                            <td>#{{ order.reference }}</td>
+                            <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
+                            <td>{{ order.totalAmount|format_currency('EUR') }}</td>
+                            <td>
+                                {% if order.status == 'PENDING' %}
+                                    <span class="badge bg-warning text-dark">En attente</span>
+                                {% elseif order.status == 'PAID' %}
+                                    <span class="badge bg-success">Payée</span>
+                                {% elseif order.status == 'SHIPPED' %}
+                                    <span class="badge bg-info">Expédiée</span>
+                                {% elseif order.status == 'DELIVERED' %}
+                                    <span class="badge bg-primary">Livrée</span>
+                                {% elseif order.status == 'CANCELLED' %}
+                                    <span class="badge bg-danger">Annulée</span>
+                                {% endif %}
+                            </td>
+                            <td>
+                                <a href="{{ path('app_order_show', {'reference': order.reference}) }}" class="btn btn-sm btn-outline-primary">
+                                    <i class="fas fa-eye"></i> Détails
+                                </a>
+                                {% if order.status == 'PENDING' %}
+                                    <form action="{{ path('app_order_cancel', {'reference': order.reference}) }}" method="post" class="d-inline" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                        <button type="submit" class="btn btn-sm btn-outline-danger">
+                                            <i class="fas fa-times"></i> Annuler
+                                        </button>
+                                    </form>
+                                {% endif %}
+                            </td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+        
+        <div class="d-flex justify-content-center mt-4">
+            <a href="{{ path('app_product_index') }}" class="btn btn-primary">
+                <i class="fas fa-arrow-left mr-2"></i> Continuer mes achats
+            </a>
+        </div>
+    {% else %}
+        <div class="alert alert-info">
+            <p class="mb-0">Vous n'avez pas encore passé de commande.</p>
+        </div>
+        <div class="text-center mt-4">
+            <a href="{{ path('app_product_index') }}" class="btn btn-primary">
+                <i class="fas fa-shopping-cart mr-2"></i> Découvrir nos produits
+            </a>
+        </div>
+    {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,209 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Détails de la commande{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <div class="d-flex justify-content-between align-items-center mb-4">
+        <h1>Commande #{{ order.reference }}</h1>
+        <a href="{{ path('app_order_index') }}" class="btn btn-outline-secondary">
+            <i class="fas fa-arrow-left mr-2"></i>Retour aux commandes
+        </a>
+    </div>
+
+    {% for message in app.flashes('success') %}
+        <div class="alert alert-success">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    {% for message in app.flashes('error') %}
+        <div class="alert alert-danger">
+            {{ message }}
+        </div>
+    {% endfor %}
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header bg-light d-flex justify-content-between align-items-center">
+                    <h5 class="mb-0">Détails de la commande</h5>
+                    <span class="badge 
+                        {% if order.status == 'PENDING' %}bg-warning text-dark
+                        {% elseif order.status == 'PAID' %}bg-success
+                        {% elseif order.status == 'SHIPPED' %}bg-info
+                        {% elseif order.status == 'DELIVERED' %}bg-primary
+                        {% elseif order.status == 'CANCELLED' %}bg-danger
+                        {% endif %}">
+                        {% if order.status == 'PENDING' %}En attente
+                        {% elseif order.status == 'PAID' %}Payée
+                        {% elseif order.status == 'SHIPPED' %}Expédiée
+                        {% elseif order.status == 'DELIVERED' %}Livrée
+                        {% elseif order.status == 'CANCELLED' %}Annulée
+                        {% endif %}
+                    </span>
+                </div>
+                <div class="card-body">
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <p class="mb-1"><strong>Date de commande :</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
+                            <p class="mb-1"><strong>Méthode de paiement :</strong> 
+                                {% if order.paymentMethod == 'credit_card' %}
+                                    Carte de crédit
+                                {% elseif order.paymentMethod == 'paypal' %}
+                                    PayPal
+                                {% elseif order.paymentMethod == 'bank_transfer' %}
+                                    Virement bancaire
+                                {% endif %}
+                            </p>
+                            {% if order.paymentDate %}
+                                <p class="mb-1"><strong>Date de paiement :</strong> {{ order.paymentDate|date('d/m/Y H:i') }}</p>
+                            {% endif %}
+                        </div>
+                    </div>
+                    
+                    <div class="row mb-4">
+                        <div class="col-md-6">
+                            <h6>Adresse de livraison</h6>
+                            <address>{{ order.shippingAddress|nl2br }}</address>
+                        </div>
+                        <div class="col-md-6">
+                            <h6>Adresse de facturation</h6>
+                            <address>{{ order.billingAddress|nl2br }}</address>
+                        </div>
+                    </div>
+                    
+                    <h6 class="mb-3">Articles commandés</h6>
+                    <div class="table-responsive">
+                        <table class="table table-bordered table-striped">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th class="text-center">Prix</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-center">Total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderItems %}
+                                    <tr>
+                                        <td>
+                                            <div class="d-flex align-items-center">
+                                                {% if item.product.imageFilename %}
+                                                    <img src="{{ asset('uploads/products/' ~ item.product.imageFilename) }}" alt="{{ item.product.name }}" class="img-thumbnail mr-3" style="width: 50px;">
+                                                {% else %}
+                                                    <div class="bg-secondary text-white d-flex align-items-center justify-content-center mr-3" style="width: 50px; height: 50px;">
+                                                        <i class="fas fa-image"></i>
+                                                    </div>
+                                                {% endif %}
+                                                <div>
+                                                    {{ item.product.name }}
+                                                    <div class="small text-muted">Réf: {{ item.product.sku }}</div>
+                                                </div>
+                                            </div>
+                                        </td>
+                                        <td class="text-center">{{ item.price|format_currency('EUR') }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        <td class="text-center">{{ item.subtotal|format_currency('EUR') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot>
+                                <tr>
+                                    <th colspan="3" class="text-end">Total</th>
+                                    <th class="text-center">{{ order.totalAmount|format_currency('EUR') }}</th>
+                                </tr>
+                            </tfoot>
+                        </table>
+                    </div>
+                </div>
+            </div>
+            
+            {% if order.status == 'PENDING' %}
+                <div class="card mb-4">
+                    <div class="card-header bg-warning text-dark">
+                        <h5 class="mb-0">Paiement en attente</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Votre commande est en attente de paiement. Veuillez procéder au paiement pour que nous puissions traiter votre commande.</p>
+                        <div class="d-flex">
+                            <a href="{{ path('app_order_payment', {'reference': order.reference}) }}" class="btn btn-primary me-3">
+                                <i class="fas fa-credit-card mr-2"></i>Procéder au paiement
+                            </a>
+                            <form action="{{ path('app_order_cancel', {'reference': order.reference}) }}" method="post" onsubmit="return confirm('Êtes-vous sûr de vouloir annuler cette commande ?')">
+                                <button type="submit" class="btn btn-outline-danger">
+                                    <i class="fas fa-times mr-2"></i>Annuler la commande
+                                </button>
+                            </form>
+                        </div>
+                    </div>
+                </div>
+            {% elseif order.status == 'PAID' %}
+                <div class="card mb-4 border-success">
+                    <div class="card-header bg-success text-white">
+                        <h5 class="mb-0">Commande confirmée</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Votre commande a été confirmée et est en cours de préparation.</p>
+                        <p class="mb-0">Vous recevrez un email de confirmation d'expédition dès que votre colis sera en route.</p>
+                    </div>
+                </div>
+            {% elseif order.status == 'SHIPPED' %}
+                <div class="card mb-4 border-info">
+                    <div class="card-header bg-info text-white">
+                        <h5 class="mb-0">Commande expédiée</h5>
+                    </div>
+                    <div class="card-body">
+                        <p>Votre commande a été expédiée et est en cours de livraison.</p>
+                        <p class="mb-0">Numéro de suivi : <strong>TRACK123456789</strong></p>
+                    </div>
+                </div>
+            {% elseif order.status == 'CANCELLED' %}
+                <div class="card mb-4 border-danger">
+                    <div class="card-header bg-danger text-white">
+                        <h5 class="mb-0">Commande annulée</h5>
+                    </div>
+                    <div class="card-body">
+                        <p class="mb-0">Cette commande a été annulée.</p>
+                    </div>
+                </div>
+            {% endif %}
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Résumé</h5>
+                </div>
+                <div class="card-body">
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Sous-total</span>
+                        <span>{{ order.totalAmount|format_currency('EUR') }}</span>
+                    </div>
+                    <div class="d-flex justify-content-between mb-2">
+                        <span>Frais de livraison</span>
+                        <span>Gratuit</span>
+                    </div>
+                    <hr>
+                    <div class="d-flex justify-content-between mb-0">
+                        <span class="fw-bold">Total</span>
+                        <span class="fw-bold">{{ order.totalAmount|format_currency('EUR') }}</span>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="card mb-4">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Besoin d'aide ?</h5>
+                </div>
+                <div class="card-body">
+                    <p>Une question sur votre commande ?</p>
+                    <a href="#" class="btn btn-outline-primary w-100">
+                        <i class="fas fa-question-circle mr-2"></i>Contacter le service client
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

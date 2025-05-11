@@ -6,7 +6,11 @@ use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-
+use Symfony\Component\Console\Attribute\AsCommand;
+#[AsCommand(
+    name: 'app:add-roles',
+    description: 'Ajoute des rôles à la base de données.'
+)]
 class AddRolesCommand extends Command
 {
     private EntityManagerInterface $entityManager;
@@ -17,7 +21,6 @@ class AddRolesCommand extends Command
         $this->entityManager = $entityManager;
     }
 
-    protected static $defaultName = 'app:add-roles';
 
     protected function execute(InputInterface $input, OutputInterface $output): int
     {
