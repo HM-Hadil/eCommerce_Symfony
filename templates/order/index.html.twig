@@ -37,16 +37,10 @@
                             <td>{{ order.createdAt|date('d/m/Y H:i') }}</td>
                             <td>{{ order.totalAmount|format_currency('EUR') }}</td>
                             <td>
-                                {% if order.status == 'PENDING' %}
-                                    <span class="badge bg-warning text-dark">En attente</span>
-                                {% elseif order.status == 'PAID' %}
+                            
+                                {% if order.paymentStatus == 'paid' %}
                                     <span class="badge bg-success">Payée</span>
-                                {% elseif order.status == 'SHIPPED' %}
-                                    <span class="badge bg-info">Expédiée</span>
-                                {% elseif order.status == 'DELIVERED' %}
-                                    <span class="badge bg-primary">Livrée</span>
-                                {% elseif order.status == 'CANCELLED' %}
-                                    <span class="badge bg-danger">Annulée</span>
+                              
                                 {% endif %}
                             </td>
                             <td>

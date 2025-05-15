@@ -3,7 +3,6 @@
 namespace App\Form;
 
 use Symfony\Component\Form\AbstractType;
-use Symfony\Component\Form\Extension\Core\Type\ChoiceType;
 use Symfony\Component\Form\Extension\Core\Type\TextareaType;
 use Symfony\Component\Form\FormBuilderInterface;
 use Symfony\Component\OptionsResolver\OptionsResolver;
@@ -19,54 +18,33 @@ class CheckoutType extends AbstractType
                 'required' => true,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Veuillez entrer une adresse de livraison'
-                    ])
+                        'message' => 'Veuillez saisir une adresse de livraison',
+                    ]),
                 ],
                 'attr' => [
-                    'class' => 'form-control',
-                    'rows' => 3
-                ]
+                    'rows' => 3,
+                    'placeholder' => 'Rue, code postal, ville, pays',
+                ],
             ])
             ->add('billingAddress', TextareaType::class, [
                 'label' => 'Adresse de facturation',
                 'required' => true,
                 'constraints' => [
                     new NotBlank([
-                        'message' => 'Veuillez entrer une adresse de facturation'
-                    ])
+                        'message' => 'Veuillez saisir une adresse de facturation',
+                    ]),
                 ],
                 'attr' => [
-                    'class' => 'form-control',
-                    'rows' => 3
-                ]
-            ])
-            ->add('paymentMethod', ChoiceType::class, [
-                'label' => 'Méthode de paiement',
-                'choices' => [
-                    'Carte de crédit' => 'credit_card',
-                    'PayPal' => 'paypal',
-                    'Virement bancaire' => 'bank_transfer'
+                    'rows' => 3,
+                    'placeholder' => 'Rue, code postal, ville, pays',
                 ],
-                'expanded' => true,
-                'multiple' => false,
-                'required' => true,
-                'constraints' => [
-                    new NotBlank([
-                        'message' => 'Veuillez choisir une méthode de paiement'
-                    ])
-                ],
-                'attr' => [
-                    'class' => 'payment-method-selection'
-                ]
             ]);
     }
 
     public function configureOptions(OptionsResolver $resolver): void
     {
         $resolver->setDefaults([
-            'csrf_protection' => true,
-            'csrf_field_name' => '_token',
-            'csrf_token_id' => 'checkout_form',
+            'data_class' => null,
         ]);
     }
 }

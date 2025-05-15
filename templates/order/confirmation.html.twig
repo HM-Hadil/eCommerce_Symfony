@@ -1,106 +1,117 @@
 {% extends 'base.html.twig' %}
+{# order/confirmation.html.twig #}
 
 {% block title %}Confirmation de commande{% endblock %}
 
 {% block body %}
 <div class="container my-5">
-    <div class="row justify-content-center">
-        <div class="col-md-8">
-            <div class="card border-success">
-                <div class="card-header bg-success text-white">
-                    <h2 class="mb-0"><i class="fas fa-check-circle mr-2"></i>Confirmation de commande</h2>
-                </div>
-                <div class="card-body">
-                    <div class="text-center mb-4">
-                        <div class="display-4 text-success mb-3">
-                            <i class="fas fa-check-circle fa-2x"></i>
-                        </div>
-                        <h3>Merci pour votre commande !</h3>
-                        <p class="lead">Votre commande #{{ order.reference }} a été confirmée avec succès.</p>
-                    </div>
-                    
-                    <div class="alert alert-info">
-                        <p class="mb-0">
-                            <i class="fas fa-info-circle mr-2"></i>Un email de confirmation a été envoyé à <strong>{{ order.user.email }}</strong>
-                        </p>
-                    </div>
-                    
-                    <div class="card mb-4">
+    {# This is where flash messages are typically displayed in base.html.twig #}
+    {# Make sure your base.html.twig has something like this: #}
+    {#
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    #}
+
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <h1 class="h4 mb-0">Confirmation de commande</h1>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fas fa-check-circle text-success fa-4x mb-3"></i>
+                <h2>Merci pour votre commande !</h2>
+                <p class="lead">Votre commande #{{ order.reference }} a été traitée avec succès.</p>
+            </div>
+
+            <div class="row mb-4">
+                <div class="col-md-6">
+                    <div class="card mb-3">
                         <div class="card-header bg-light">
                             <h5 class="mb-0">Détails de la commande</h5>
                         </div>
                         <div class="card-body">
-                            <div class="row mb-3">
+                            <p><strong>Numéro de commande :</strong> #{{ order.reference }}</p>
+                            <p><strong>Date :</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
+                            <p><strong>Statut :</strong>
+                                <span class="badge bg-success">{{ order.paymentStatus }}</span>
+                            </p>
+                            <p><strong>Méthode de paiement :</strong> Carte bancaire (Stripe)</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card">
+                        <div class="card-header bg-light">
+                            <h5 class="mb-0">Adresses</h5>
+                        </div>
+                        <div class="card-body">
+                            <div class="row">
                                 <div class="col-md-6">
-                                    <p class="mb-1"><strong>Numéro de commande :</strong> #{{ order.reference }}</p>
-                                    <p class="mb-1"><strong>Date :</strong> {{ order.createdAt|date('d/m/Y H:i') }}</p>
-                                    <p class="mb-1"><strong>Statut :</strong> 
-                                        <span class="badge {% if order.status == 'PAID' %}bg-success{% else %}bg-warning{% endif %}">
-                                            {% if order.status == 'PAID' %}Payée{% else %}En attente de paiement{% endif %}
-                                        </span>
-                                    </p>
-                                    <p class="mb-0"><strong>Méthode de paiement :</strong> 
-                                        {% if order.paymentMethod == 'credit_card' %}
-                                            Carte de crédit
-                                        {% elseif order.paymentMethod == 'paypal' %}
-                                            PayPal
-                                        {% elseif order.paymentMethod == 'bank_transfer' %}
-                                            Virement bancaire
-                                        {% endif %}
-                                    </p>
+                                    <h6>Adresse de livraison</h6>
+                                    <p class="mb-0">{{ order.shippingAddress|nl2br }}</p>
                                 </div>
                                 <div class="col-md-6">
-                                    <h6>Adresse de livraison :</h6>
-                                    <address>{{ order.shippingAddress|nl2br }}</address>
+                                    <h6>Adresse de facturation</h6>
+                                    <p class="mb-0">{{ order.billingAddress|nl2br }}</p>
                                 </div>
-                            </div>
-                            
-                            <h6 class="mb-3">Articles commandés :</h6>
-                            <div class="table-responsive">
-                                <table class="table table-bordered table-striped">
-                                    <thead>
-                                        <tr>
-                                            <th>Produit</th>
-                                            <th class="text-center">Prix</th>
-                                            <th class="text-center">Quantité</th>
-                                            <th class="text-center">Total</th>
-                                        </tr>
-                                    </thead>
-                                    <tbody>
-                                        {% for item in order.orderItems %}
-                                            <tr>
-                                                <td>{{ item.product.name }}</td>
-                                                <td class="text-center">{{ item.price|format_currency('EUR') }}</td>
-                                                <td class="text-center">{{ item.quantity }}</td>
-                                                <td class="text-center">{{ item.subtotal|format_currency('EUR') }}</td>
-                                            </tr>
-                                        {% endfor %}
-                                    </tbody>
-                                    <tfoot>
-                                        <tr>
-                                            <th colspan="3" class="text-end">Total</th>
-                                            <th class="text-center">{{ order.totalAmount|format_currency('EUR') }}</th>
-                                        </tr>
-                                    </tfoot>
-                                </table>
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="alert alert-warning">
-                        <h6 class="alert-heading">Instructions de livraison :</h6>
-                        <p class="mb-0">Votre commande sera préparée et expédiée dans un délai de 2 à 3 jours ouvrés. Un email de suivi vous sera envoyé dès que votre colis sera expédié.</p>
-                    </div>
-                    
-                    <div class="d-flex justify-content-center mt-4">
-                        <a href="{{ path('app_order_index') }}" class="btn btn-primary me-3">
-                            <i class="fas fa-list mr-2"></i>Mes commandes
-                        </a>
-                        <a href="{{ path('app_product_index') }}" class="btn btn-outline-secondary">
-                            <i class="fas fa-shopping-cart mr-2"></i>Continuer mes achats
-                        </a>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header bg-light">
+                    <h5 class="mb-0">Récapitulatif des produits</h5>
+                </div>
+                <div class="card-body p-0">
+                    <div class="table-responsive">
+                        <table class="table table-striped mb-0">
+                            <thead>
+                                <tr>
+                                    <th>Produit</th>
+                                    <th class="text-center">Quantité</th>
+                                    <th class="text-end">Prix unitaire</th>
+                                    <th class="text-end">Sous-total</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in order.orderItems %}
+                                    <tr>
+                                        {# Use item.productName as stored in OrderItem #}
+                                        <td>{{ item.productName ?? 'Produit' }}</td>
+                                        <td class="text-center">{{ item.quantity }}</td>
+                                        {# Use item.price as stored in OrderItem #}
+                                        <td class="text-end">{{ item.price|format_currency('EUR') }}</td> {# Adjust currency filter #}
+                                        <td class="text-end">{{ item.subtotal|format_currency('EUR') }}</td>
+                                    </tr>
+                                {% endfor %}
+                            </tbody>
+                            <tfoot class="table-group-divider">
+                                <tr>
+                                    <th colspan="3" class="text-end">Total</th>
+                                    {# Use order.totalAmount property #}
+                                    <th class="text-end">{{ order.totalAmount|format_currency('EUR') }}</th> {# Adjust currency filter #}
+                                </tr>
+                            </tfoot>
+                        </table>
                     </div>
                 </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ path('app_home') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Retour à l'accueil
+                </a>
+                {# CORRECTED: Use the correct route name for user orders #}
+                <a href="{{ path('app_order_index') }}" class="btn btn-outline-secondary ms-2">
+                    <i class="fas fa-list me-2"></i>Mes commandes
+                </a>
             </div>
         </div>
     </div>

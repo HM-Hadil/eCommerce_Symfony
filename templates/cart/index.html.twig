@@ -1,3 +1,4 @@
+
 {% extends 'base.html.twig' %}
 
 {% block title %}Mon Panier{% endblock %}
@@ -34,8 +35,8 @@
                     <div class="row mb-3 d-flex align-items-center">
                         <div class="col-md-5">
                             <div class="d-flex align-items-center">
-                                {% if item.product.imageFile %}
-                                    <img src="{{ asset('uploads/products/' ~ item.product.imageFile) }}" alt="{{ item.product.name }}" class="img-thumbnail mr-3" style="width: 80px;">
+                                {% if item.product.image %}
+                                    <img src="{{ vich_uploader_asset(item.product, 'imageFile') }}" alt="{{ item.product.name }}" class="img-thumbnail mr-3" style="width: 80px;">
                                 {% else %}
                                     <div class="bg-secondary text-white d-flex align-items-center justify-content-center mr-3" style="width: 80px; height: 80px;">
                                         <i class="fas fa-image fa-2x"></i>
@@ -48,23 +49,23 @@
                             </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            {{ item.price|format_currency('EUR') }}
+                            {{ item.price }} TND
                         </div>
                         <div class="col-md-2 text-center">
-                            <form action="{{ path('app_cart_update', {'id': item.id}) }}" method="post" class="quantity-form d-flex justify-content-center align-items-center">
+                            <div class="d-flex justify-content-center align-items-center">
                                 <div class="input-group" style="width: 120px;">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quantity-decrease">-</button>
-                                    <input type="number" name="quantity" value="{{ item.quantity }}" min="1" max="{{ item.product.stock }}" class="form-control form-control-sm text-center quantity-input">
-                                    <button type="button" class="btn btn-sm btn-outline-secondary quantity-increase">+</button>
+                                    <a href="{{ path('app_cart_decrease', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary">-</a>
+                                    <span class="form-control form-control-sm text-center">{{ item.quantity }}</span>
+                                    <a href="{{ path('app_cart_increase', {'id': item.id}) }}" class="btn btn-sm btn-outline-secondary">+</a>
                                 </div>
-                            </form>
+                            </div>
                         </div>
                         <div class="col-md-2 text-center">
-                            {{ item.subtotal|format_currency('EUR') }}
+                            {{ item.subtotal }} TND
                         </div>
                         <div class="col-md-1 text-center">
                             <a href="{{ path('app_cart_remove', {'id': item.id}) }}" class="btn btn-sm btn-outline-danger">
-                                <i class="fas fa-trash"></i>
+                               supprimer
                             </a>
                         </div>
                     </div>
@@ -79,7 +80,7 @@
                         <h5 class="font-weight-bold">Total</h5>
                     </div>
                     <div class="col-md-2 text-center">
-                        <h5 class="font-weight-bold">{{ cart.total|format_currency('EUR') }}</h5>
+                        <h5 class="font-weight-bold">{{ cart.total }} TND</h5>
                     </div>
                     <div class="col-md-1"></div>
                 </div>
@@ -87,14 +88,12 @@
         </div>
         
         <div class="d-flex justify-content-between mt-4">
-            <a href="{{ path('app_product_index') }}" class="btn btn-outline-secondary">
-                <i class="fas fa-arrow-left mr-2"></i>Continuer mes achats
-            </a>
+          
             <div>
                 <a href="{{ path('app_cart_clear') }}" class="btn btn-outline-danger mr-2" onclick="return confirm('Êtes-vous sûr de vouloir vider votre panier?')">
                     <i class="fas fa-trash mr-2"></i>Vider le panier
                 </a>
-                <a href="{{ path('app_order_checkout') }}" class="btn btn-success">
+                <a href="{{ path('app_checkout') }}" class="btn btn-success">
                     <i class="fas fa-check mr-2"></i>Passer commande
                 </a>
             </div>
@@ -110,37 +109,6 @@
 </div>
 
 {% block javascripts %}
-<script>
-document.addEventListener('DOMContentLoaded', function() {
-    // Handle quantity buttons
-    document.querySelectorAll('.quantity-decrease').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('.quantity-input');
-            if (parseInt(input.value) > 1) {
-                input.value = parseInt(input.value) - 1;
-                this.closest('form').submit();
-            }
-        });
-    });
-
-    document.querySelectorAll('.quantity-increase').forEach(function(button) {
-        button.addEventListener('click', function() {
-            const input = this.parentElement.querySelector('.quantity-input');
-            const max = parseInt(input.getAttribute('max'));
-            if (parseInt(input.value) < max) {
-                input.value = parseInt(input.value) + 1;
-                this.closest('form').submit();
-            }
-        });
-    });
-
-    // Submit form when quantity input changes
-    document.querySelectorAll('.quantity-input').forEach(function(input) {
-        input.addEventListener('change', function() {
-            this.closest('form').submit();
-        });
-    });
-});
-</script>
+<!-- Nous n'avons plus besoin de JavaScript pour les boutons d'incrémentation/décrémentation -->
 {% endblock %}
 {% endblock %}

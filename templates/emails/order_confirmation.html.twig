@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmation de votre commande</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            line-height: 1.6;
+            color: #333333;
+            margin: 0;
+            padding: 0;
+        }
+        .container {
+            max-width: 600px;
+            margin: 0 auto;
+            padding: 20px;
+        }
+        .header {
+            background-color: #f8f9fa;
+            padding: 20px;
+            text-align: center;
+            border-bottom: 3px solid #4CAF50;
+        }
+        .content {
+            padding: 20px;
+        }
+        .order-details {
+            background-color: #f9f9f9;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .order-item {
+            border-bottom: 1px solid #eeeeee;
+            padding: 10px 0;
+        }
+        .order-item:last-child {
+            border-bottom: none;
+        }
+        .order-summary {
+            margin-top: 20px;
+            border-top: 2px solid #eeeeee;
+            padding-top: 15px;
+        }
+        .button {
+            display: inline-block;
+            background-color: #4CAF50;
+            color: white;
+            text-decoration: none;
+            padding: 10px 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        .delivery-info {
+            background-color: #f0f7ff;
+            padding: 15px;
+            border-radius: 5px;
+            margin-bottom: 20px;
+        }
+        .footer {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid #eeeeee;
+            text-align: center;
+            font-size: 12px;
+            color: #777777;
+        }
+        .social-links {
+            margin-top: 15px;
+        }
+        .social-links a {
+            margin: 0 10px;
+            text-decoration: none;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Merci pour votre commande!</h1>
+            <p>Commande #12345 - 11 mai 2025</p>
+        </div>
+        
+        <div class="content">
+            <p>Bonjour [Nom du client],</p>
+            
+            <p>Nous vous confirmons que votre commande a bien été reçue et est en cours de traitement. Vous trouverez ci-dessous un récapitulatif de votre achat.</p>
+            
+            <div class="order-details">
+                <h2>Détails de votre commande</h2>
+                <div class="order-item">
+                    <p><strong>Produit 1</strong> (Ref: P12345) <br>
+                    Quantité: 1 <br>
+                    Prix unitaire: 39,99 €</p>
+                </div>
+                <div class="order-item">
+                    <p><strong>Produit 2</strong> (Ref: P67890) <br>
+                    Quantité: 2 <br>
+                    Prix unitaire: 24,50 €</p>
+                </div>
+                <div class="order-summary">
+                    <p>Sous-total: 88,99 €<br>
+                    Frais de livraison: 4,95 €<br>
+                    <strong>Total: 93,94 €</strong></p>
+                </div>
+            </div>
+            
+            <div class="delivery-info">
+                <h2>Informations de livraison</h2>
+                <p>
+                    Adresse de livraison:<br>
+                    [Nom et prénom]<br>
+                    [Adresse]<br>
+                    [Code postal et ville]<br>
+                    [Pays]
+                </p>
+                <p>Mode de livraison: Colissimo<br>
+                   Date de livraison estimée: 14-15 mai 2025</p>
+            </div>
+            
+            <p>Vous recevrez un email avec les informations de suivi dès que votre colis sera expédié.</p>
+            
+            <center>
+                <a href="#" class="button">Suivre ma commande</a>
+            </center>
+            
+            <p>Si vous avez des questions concernant votre commande, n'hésitez pas à contacter notre service client à l'adresse <a href="mailto:support@example.com">support@example.com</a> ou par téléphone au 01 23 45 67 89.</p>
+            
+            <p>Merci pour votre confiance,<br>
+            L'équipe [Nom de l'entreprise]</p>
+        </div>
+        
+        <div class="footer">
+            <p>[Nom de l'entreprise] - 123 Rue du Commerce, 75001 Paris, France</p>
+            <p>Vous recevez cet email car vous avez effectué un achat sur notre site.</p>
+            <div class="social-links">
+                <a href="#">Facebook</a> |
+                <a href="#">Instagram</a> |
+                <a href="#">Twitter</a>
+            </div>
+            <p>&copy; 2025 [Nom de l'entreprise]. Tous droits réservés.</p>
+        </div>
+    </div>
+</body>
+</html>

@@ -4,12 +4,17 @@
 # Put parameters here that don't need to change on each machine where the app is deployed
 # https://symfony.com/doc/current/best_practices.html#use-parameters-for-application-configuration
 parameters:
+    # These parameters are correctly defined
+    stripe_public_key: '%env(STRIPE_PUBLIC_KEY)%'
+    stripe_secret_key: '%env(STRIPE_SECRET_KEY)%'
+    app.currency: 'usd'  # Or EUR, USD, etc. - ensure this matches your Stripe account capabilities
 
 services:
     # default configuration for services in *this* file
     _defaults:
         autowire: true      # Automatically injects dependencies in your services.
         autoconfigure: true # Automatically registers your services as commands, event subscribers, etc.
+        # public: false # Setting to false by default is generally good practice, but might need adjustment
 
     # makes classes in src/ available to be used as services
     # this creates a service per class whose id is the fully-qualified class name
@@ -19,11 +24,32 @@ services:
             - '../src/DependencyInjection/'
             - '../src/Entity/'
             - '../src/Kernel.php'
+
+    # Configure OtpService - This definition looks correct based on typical needs
     App\Service\OtpService:
         arguments:
             $twilioSid: '%env(TWILIO_SID)%'
             $twilioAuthToken: '%env(TWILIO_AUTH_TOKEN)%'
             $twilioFromNumber: '%env(TWILIO_FROM_NUMBER)%'
+
+    # Configure StripeService
+    # CORRECTED: Update arguments to match the constructor signature
+    App\Service\StripeService:
+        arguments:
+            # Inject the Router service
+            $router: '@router'
+            # Inject the ParameterBag service to access parameters
+            $parameterBag: '@parameter_bag'
+            # Inject the Logger service
+            $logger: '@logger'
+        # If you prefer using autowiring for StripeService, you can remove the 'arguments' section
+        # and rely on autowire: true from _defaults, provided RouterInterface, ParameterBagInterface,
+        # and LoggerInterface are correctly type-hinted in the constructor.
+        # Example with autowire:
+        # App\Service\StripeService:
+        #     # autowire: true # Already enabled by _defaults
+        #     # autoconfigure: true # Already enabled by _defaults
+
 
     # add more service definitions when explicit configuration is needed
     # please note that last definitions always *replace* previous ones

@@ -1,0 +1,85 @@
+    {# checkout/confirmation.html.twigg#}
+
+{% extends 'base.html.twig' %}
+
+{% block title %}Confirmation de commande{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    {# This is where flash messages are typically displayed in base.html.twig #}
+    {# Make sure your base.html.twig has something like this: #}
+    {#
+    {% for type, messages in app.flashes %}
+        {% for message in messages %}
+            <div class="alert alert-{{ type }}">
+                {{ message }}
+            </div>
+        {% endfor %}
+    {% endfor %}
+    #}
+
+    <div class="card border-success">
+        <div class="card-header bg-success text-white">
+            <h2 class="mb-0"><i class="fas fa-check-circle me-2"></i>Commande confirmée</h2>
+        </div>
+        <div class="card-body">
+            <div class="text-center mb-4">
+                <i class="fas fa-check-circle text-success" style="font-size: 4rem;"></i>
+                <h3 class="mt-3">Merci pour votre commande !</h3>
+                <p class="lead">Votre numéro de commande est : <strong>{{ order.reference }}</strong></p>
+            </div>
+
+            <div class="row">
+                <div class="col-md-6">
+                    <h4>Informations de livraison</h4>
+                    <p>{{ order.shippingAddress|nl2br }}</p> {# Use nl2br filter for multi-line addresses #}
+
+                    <h4 class="mt-4">Adresse de facturation</h4>
+                    <p>{{ order.billingAddress|nl2br }}</p> {# Use nl2br filter for multi-line addresses #}
+                </div>
+
+                <div class="col-md-6">
+                    <h4>Détails de la commande</h4>
+                    <table class="table table-striped">
+                        <thead>
+                            <tr>
+                                <th>Produit</th>
+                                <th class="text-center">Qté</th>
+                                <th class="text-end">Prix</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for item in order.orderItems %}
+                                <tr>
+                                    {# Use item.productName as stored in OrderItem #}
+                                    <td>{{ item.productName ?? 'Produit' }}</td>
+                                    <td class="text-center">{{ item.quantity }}</td>
+                                    {# Use item.price as stored in OrderItem #}
+                                    <td class="text-end">{{ item.price|format_currency('EUR') }}</td> {# Adjust currency filter #}
+                                </tr>
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th colspan="2" class="text-end">Total</th>
+                                {# Use order.totalAmount property #}
+                                <th class="text-end">{{ order.totalAmount|format_currency('EUR') }}</th> {# Adjust currency filter #}
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <a href="{{ path('app_home') }}" class="btn btn-primary">
+                    <i class="fas fa-home me-2"></i>Retour à l'accueil
+                </a>
+                 {# Link to view the full order details page #}
+                 <a href="{{ path('app_order_show', {'reference': order.reference}) }}" class="btn btn-secondary">
+                     <i class="fas fa-receipt me-2"></i>Voir la commande complète
+                 </a>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
