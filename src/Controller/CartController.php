@@ -2,10 +2,12 @@
 
 namespace App\Controller;
 
+use App\Entity\Cart;
 use App\Entity\CartItem;
 use App\Entity\Product;
 use App\Form\CartItemType;
 use App\Service\CartService;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
@@ -37,21 +39,21 @@ class CartController extends AbstractController
     public function addToCart(Request $request, Product $product): Response
     {
         $quantity = (int) $request->request->get('quantity', 1);
-        
+
         if ($quantity <= 0) {
             $this->addFlash('error', 'La quantité doit être supérieure à 0');
             return $this->redirectToRoute('app_product_show', ['id' => $product->getId()]);
         }
-        
+
         $result = $this->cartService->addItem($product, $quantity);
-        
+
         if (!$result) {
             $this->addFlash('error', 'Impossible d\'ajouter ce produit au panier. Vérifiez sa disponibilité.');
             return $this->redirectToRoute('app_product_show', ['id' => $product->getId()]);
         }
-        
+
         $this->addFlash('success', 'Produit ajouté au panier avec succès');
-        
+
         // If ajax request, return success json
         if ($request->isXmlHttpRequest()) {
             return $this->json([
@@ -60,7 +62,7 @@ class CartController extends AbstractController
                 'total' => $this->cartService->getTotal()
             ]);
         }
-        
+
         return $this->redirectToRoute('app_cart_index');
     }
 
@@ -68,15 +70,15 @@ class CartController extends AbstractController
     public function updateCartItem(Request $request, CartItem $cartItem): Response
     {
         $quantity = (int) $request->request->get('quantity', 1);
-        
+
         $result = $this->cartService->updateItemQuantity($cartItem, $quantity);
-        
+
         if (!$result) {
             $this->addFlash('error', 'Impossible de mettre à jour la quantité. Vérifiez la disponibilité du produit.');
         } else {
             $this->addFlash('success', 'Panier mis à jour avec succès');
         }
-        
+
         // If ajax request, return success json
         if ($request->isXmlHttpRequest()) {
             $cart = $this->cartService->getCart();
@@ -87,7 +89,7 @@ class CartController extends AbstractController
                 'subtotal' => $cartItem->getSubtotal()
             ]);
         }
-        
+
         return $this->redirectToRoute('app_cart_index');
     }
 
@@ -95,9 +97,9 @@ class CartController extends AbstractController
     public function removeCartItem(CartItem $cartItem): Response
     {
         $this->cartService->removeItem($cartItem);
-        
+
         $this->addFlash('success', 'Produit retiré du panier');
-        
+
         return $this->redirectToRoute('app_cart_index');
     }
 
@@ -105,9 +107,44 @@ class CartController extends AbstractController
     public function clearCart(): Response
     {
         $this->cartService->clearCart();
-        
+
         $this->addFlash('success', 'Panier vidé avec succès');
-        
+
+        return $this->redirectToRoute('app_cart_index');
+    }
+
+    #[Route('/increase/{id}', name: 'app_cart_increase', methods: ['GET'])]
+    public function increase(CartItem $cartItem, EntityManagerInterface $entityManager): Response
+    {
+        // Utiliser le service CartService au lieu de manipuler directement les entités
+        $result = $this->cartService->updateItemQuantity($cartItem, $cartItem->getQuantity() + 1);
+
+        if (!$result) {
+            $this->addFlash('error', 'Stock insuffisant');
+        } else {
+            $this->addFlash('success', 'Quantité augmentée');
+        }
+
+        return $this->redirectToRoute('app_cart_index');
+    }
+
+    #[Route('/decrease/{id}', name: 'app_cart_decrease', methods: ['GET'])]
+    public function decrease(CartItem $cartItem, EntityManagerInterface $entityManager): Response
+    {
+        if ($cartItem->getQuantity() <= 1) {
+            $this->addFlash('error', 'La quantité minimale est de 1');
+            return $this->redirectToRoute('app_cart_index');
+        }
+
+        // Utiliser le service CartService au lieu de manipuler directement les entités
+        $result = $this->cartService->updateItemQuantity($cartItem, $cartItem->getQuantity() - 1);
+
+        if (!$result) {
+            $this->addFlash('error', 'Impossible de diminuer la quantité');
+        } else {
+            $this->addFlash('success', 'Quantité diminuée');
+        }
+
         return $this->redirectToRoute('app_cart_index');
     }
 }

@@ -1,0 +1,95 @@
+{% extends 'base.html.twig' %}
+
+{% block title %}Paiement{% endblock %}
+
+{% block stylesheets %}
+    {{ parent() }}
+    <style>
+        #payment-errors {
+            display: none;
+            color: #dc3545;
+            background-color: #f8d7da;
+            border: 1px solid #f5c6cb;
+            border-radius: 4px;
+            padding: 10px;
+            margin-bottom: 15px;
+        }
+    </style>
+{% endblock %}
+
+{% block body %}
+<div class="container my-5">
+    <h1 class="mb-4">Finaliser votre commande</h1>
+    
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card mb-4">
+                <div class="card-header">
+                    <h3 class="mb-0">Informations de livraison et facturation</h3>
+                </div>
+                <div class="card-body">
+                    <div id="payment-errors"></div>
+                    
+                    {{ form_start(form, {'attr': {'id': 'checkout-form'}}) }}
+                        <div class="mb-3">
+                            {{ form_label(form.shippingAddress) }}
+                            {{ form_widget(form.shippingAddress, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.shippingAddress) }}
+                        </div>
+                        
+                        <div class="mb-3">
+                            {{ form_label(form.billingAddress) }}
+                            {{ form_widget(form.billingAddress, {'attr': {'class': 'form-control'}}) }}
+                            {{ form_errors(form.billingAddress) }}
+                        </div>
+                        
+                        <div class="d-grid gap-2">
+                            <button type="submit" id="payment-button" class="btn btn-primary btn-lg">
+                                Procéder au paiement
+                            </button>
+                        </div>
+                    {{ form_end(form) }}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <div class="card">
+                <div class="card-header">
+                    <h3 class="mb-0">Résumé de votre commande</h3>
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <tbody>
+                            {% set total = 0 %}
+                            {% for item in cart.cartItems %}
+                                <tr>
+                                    <td>{{ item.product.name }} x {{ item.quantity }}</td>
+                                    <td class="text-end">{{ (item.price * item.quantity)|format_currency('EUR') }}</td>
+                                </tr>
+                                {% set total = total + (item.price * item.quantity) %}
+                            {% endfor %}
+                        </tbody>
+                        <tfoot>
+                            <tr>
+                                <th>Total</th>
+                                <th class="text-end">{{ total|format_currency('EUR') }}</th>
+                            </tr>
+                        </tfoot>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block javascripts %}
+    {{ parent() }}
+    <script src="https://js.stripe.com/v3/"></script>
+    <script>
+        // Variable globale pour la clé publique Stripe
+        const stripePublicKey = '{{ stripe_public_key }}';
+    </script>
+    <script src="{{ asset('js/stripe-payment.js') }}"></script>
+{% endblock %}

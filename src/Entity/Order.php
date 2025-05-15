@@ -6,37 +6,53 @@ use App\Repository\OrderRepository;
 use Doctrine\Common\Collections\ArrayCollection;
 use Doctrine\Common\Collections\Collection;
 use Doctrine\ORM\Mapping as ORM;
+use Symfony\Component\Uid\Uuid;
 
 #[ORM\Entity(repositoryClass: OrderRepository::class)]
 #[ORM\Table(name: '`order`')]
+#[ORM\HasLifecycleCallbacks]
 class Order
 {
-    const STATUS_PENDING = 'pending';
-    const STATUS_PAID = 'paid';
-    const STATUS_SHIPPED = 'shipped';
-    const STATUS_DELIVERED = 'delivered';
-    const STATUS_CANCELLED = 'cancelled';
+    // Define constants for statuses
+    public const STATUS_PENDING = 'pending';
+    public const STATUS_PROCESSING = 'processing';
+    public const STATUS_SHIPPED = 'shipped';
+    public const STATUS_DELIVERED = 'delivered';
+    public const STATUS_CANCELLED = 'cancelled';
+
+    // Add payment status constants
+    public const PAYMENT_STATUS_PENDING = 'pending';
+    public const PAYMENT_STATUS_PAID = 'paid';
+    public const PAYMENT_STATUS_FAILED = 'failed';
+    public const PAYMENT_STATUS_REFUNDED = 'refunded';
 
     #[ORM\Id]
     #[ORM\GeneratedValue]
     #[ORM\Column]
     private ?int $id = null;
 
-    #[ORM\Column(length: 20)]
+    #[ORM\Column(length: 255, unique: true)]
     private ?string $reference = null;
+
+    #[ORM\Column]
+    private ?float $totalAmount = 0.0; // Stored total
+
+    #[ORM\Column(length: 255)]
+    private ?string $status = self::STATUS_PENDING; // Default status
+
+    #[ORM\Column(length: 50)]
+    private ?string $paymentStatus = self::PAYMENT_STATUS_PENDING; // Default payment status
+
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $paymentMethod = null;
 
     #[ORM\ManyToOne(inversedBy: 'orders')]
     #[ORM\JoinColumn(nullable: false)]
     private ?User $user = null;
 
-    #[ORM\OneToMany(mappedBy: 'orderRef', targetEntity: OrderItem::class, orphanRemoval: true, cascade: ['persist', 'remove'])]
+    // CORRECTED: mappedBy should match the property name in OrderItem entity ('order')
+    #[ORM\OneToMany(mappedBy: 'order', targetEntity: OrderItem::class, orphanRemoval: true, cascade: ['persist'])]
     private Collection $orderItems;
-
-    #[ORM\Column]
-    private ?float $totalAmount = null;
-
-    #[ORM\Column(length: 255)]
-    private ?string $status = self::STATUS_PENDING;
 
     #[ORM\Column]
     private ?\DateTimeImmutable $createdAt = null;
@@ -44,25 +60,35 @@ class Order
     #[ORM\Column(nullable: true)]
     private ?\DateTimeImmutable $updatedAt = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    // Assuming simple string storage for addresses
+    #[ORM\Column(type: 'text')]
     private ?string $shippingAddress = null;
 
-    #[ORM\Column(length: 255, nullable: true)]
+    #[ORM\Column(type: 'text')]
     private ?string $billingAddress = null;
 
-    #[ORM\Column(length: 20, nullable: true)]
-    private ?string $paymentMethod = null;
+    #[ORM\Column(length: 255, nullable: true)]
+    private ?string $paymentReference = null; // e.g., Stripe Session ID or Payment Intent ID
 
     #[ORM\Column(nullable: true)]
-    private ?\DateTimeImmutable $paymentDate = null;
+    private ?\DateTimeImmutable $paidAt = null;
+
+    // Add other timestamps if needed (shippedAt, deliveredAt)
+
 
     public function __construct()
     {
         $this->orderItems = new ArrayCollection();
         $this->createdAt = new \DateTimeImmutable();
-        $this->reference = 'ORD-' . strtoupper(uniqid());
+        $this->reference = Uuid::v4()->toRfc4122();
         $this->status = self::STATUS_PENDING;
-        $this->totalAmount = 0;
+        $this->paymentStatus = self::PAYMENT_STATUS_PENDING;
+    }
+
+    #[ORM\PreUpdate]
+    public function setUpdatedAtValue(): void
+    {
+        $this->updatedAt = new \DateTimeImmutable();
     }
 
     public function getId(): ?int
@@ -75,10 +101,56 @@ class Order
         return $this->reference;
     }
 
-    public function setReference(string $reference): static
+    public function getTotalAmount(): ?float
     {
-        $this->reference = $reference;
+        return $this->totalAmount;
+    }
 
+    public function setTotalAmount(float $totalAmount): self
+    {
+        $this->totalAmount = $totalAmount;
+        return $this;
+    }
+
+    public function getStatus(): ?string
+    {
+        return $this->status;
+    }
+
+    public function setStatus(string $status): self
+    {
+         if ($this->status !== $status) {
+             $this->status = $status;
+         }
+        return $this;
+    }
+
+    public function getPaymentStatus(): ?string
+    {
+        return $this->paymentStatus;
+    }
+
+    public function setPaymentStatus(string $paymentStatus): self
+    {
+        if ($this->paymentStatus !== $paymentStatus) {
+            $this->paymentStatus = $paymentStatus;
+             if ($paymentStatus === self::PAYMENT_STATUS_PAID) {
+                 $this->setPaidAt(new \DateTimeImmutable());
+             } else {
+                 $this->setPaidAt(null);
+             }
+        }
+        return $this;
+    }
+
+    public function getPaymentMethod(): ?string
+    {
+        return $this->paymentMethod;
+    }
+
+    public function setPaymentMethod(?string $paymentMethod): self
+    {
+        $this->paymentMethod = $paymentMethod;
         return $this;
     }
 
@@ -87,10 +159,9 @@ class Order
         return $this->user;
     }
 
-    public function setUser(?User $user): static
+    public function setUser(?User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
@@ -102,49 +173,28 @@ class Order
         return $this->orderItems;
     }
 
-    public function addOrderItem(OrderItem $orderItem): static
+    public function addOrderItem(OrderItem $orderItem): self
     {
         if (!$this->orderItems->contains($orderItem)) {
             $this->orderItems->add($orderItem);
-            $orderItem->setOrderRef($this);
+            // Ensure the OrderItem knows about its Order
+            // This method call now matches the corrected OrderItem entity
+            if ($orderItem->getOrder() !== $this) {
+                $orderItem->setOrder($this);
+            }
         }
-
         return $this;
     }
 
-    public function removeOrderItem(OrderItem $orderItem): static
+    public function removeOrderItem(OrderItem $orderItem): self
     {
         if ($this->orderItems->removeElement($orderItem)) {
             // set the owning side to null (unless already changed)
-            if ($orderItem->getOrderRef() === $this) {
-                $orderItem->setOrderRef(null);
+            // This method call now matches the corrected OrderItem entity
+            if ($orderItem->getOrder() === $this) {
+                $orderItem->setOrder(null);
             }
         }
-
-        return $this;
-    }
-
-    public function getTotalAmount(): ?float
-    {
-        return $this->totalAmount;
-    }
-
-    public function setTotalAmount(float $totalAmount): static
-    {
-        $this->totalAmount = $totalAmount;
-
-        return $this;
-    }
-
-    public function getStatus(): ?string
-    {
-        return $this->status;
-    }
-
-    public function setStatus(string $status): static
-    {
-        $this->status = $status;
-
         return $this;
     }
 
@@ -153,10 +203,9 @@ class Order
         return $this->createdAt;
     }
 
-    public function setCreatedAt(\DateTimeImmutable $createdAt): static
+    public function setCreatedAt(\DateTimeImmutable $createdAt): self
     {
         $this->createdAt = $createdAt;
-
         return $this;
     }
 
@@ -165,22 +214,14 @@ class Order
         return $this->updatedAt;
     }
 
-    public function setUpdatedAt(?\DateTimeImmutable $updatedAt): static
-    {
-        $this->updatedAt = $updatedAt;
-
-        return $this;
-    }
-
     public function getShippingAddress(): ?string
     {
         return $this->shippingAddress;
     }
 
-    public function setShippingAddress(?string $shippingAddress): static
+    public function setShippingAddress(string $shippingAddress): self
     {
         $this->shippingAddress = $shippingAddress;
-
         return $this;
     }
 
@@ -189,59 +230,76 @@ class Order
         return $this->billingAddress;
     }
 
-    public function setBillingAddress(?string $billingAddress): static
+    public function setBillingAddress(string $billingAddress): self
     {
         $this->billingAddress = $billingAddress;
-
         return $this;
     }
 
-    public function getPaymentMethod(): ?string
+    public function getPaymentReference(): ?string
     {
-        return $this->paymentMethod;
+        return $this->paymentReference;
     }
 
-    public function setPaymentMethod(?string $paymentMethod): static
+    public function setPaymentReference(?string $paymentReference): self
     {
-        $this->paymentMethod = $paymentMethod;
-
+        $this->paymentReference = $paymentReference;
         return $this;
     }
 
-    public function getPaymentDate(): ?\DateTimeImmutable
+    public function getPaidAt(): ?\DateTimeImmutable
     {
-        return $this->paymentDate;
+        return $this->paidAt;
     }
 
-    public function setPaymentDate(?\DateTimeImmutable $paymentDate): static
+    public function setPaidAt(?\DateTimeImmutable $paidAt): self
     {
-        $this->paymentDate = $paymentDate;
-
+        $this->paidAt = $paidAt;
         return $this;
     }
 
     /**
-     * Calculate total items in order
+     * Calcule le total de la commande et le stocke dans la propriété totalAmount
      */
-    public function getItemCount(): int
+    public function calculateAndSetTotal(): float
     {
-        $count = 0;
+        $total = 0.0;
         foreach ($this->orderItems as $item) {
-            $count += $item->getQuantity();
+            if ($item->getPrice() !== null && $item->getQuantity() !== null) {
+                 $total += $item->getPrice() * $item->getQuantity();
+            }
         }
-        return $count;
-    }
-
-    /**
-     * Recalculate total amount from order items
-     */
-    public function calculateTotalAmount(): float
-    {
-        $total = 0;
-        foreach ($this->orderItems as $item) {
-            $total += $item->getSubtotal();
-        }
-        $this->totalAmount = $total;
+        $this->setTotalAmount($total);
         return $total;
     }
+
+    // You can keep a simple getTotal() method for convenience
+    public function getTotal(): ?float
+    {
+        return $this->getTotalAmount();
+    }
+
+    // Add helper methods for status labels
+     public function getStatusLabel(): string
+     {
+         $labels = [
+             self::STATUS_PENDING => 'En attente',
+             self::STATUS_PROCESSING => 'En traitement',
+             self::STATUS_SHIPPED => 'Expédiée',
+             self::STATUS_DELIVERED => 'Livrée',
+             self::STATUS_CANCELLED => 'Annulée'
+         ];
+         return $labels[$this->status] ?? $this->status;
+     }
+
+     public function getPaymentStatusLabel(): string
+     {
+         $labels = [
+             self::PAYMENT_STATUS_PENDING => 'En attente',
+             self::PAYMENT_STATUS_PAID => 'Payée',
+             self::PAYMENT_STATUS_FAILED => 'Échouée',
+             self::PAYMENT_STATUS_REFUNDED => 'Remboursée'
+         ];
+         return $labels[$this->paymentStatus] ?? $this->paymentStatus;
+     }
 }

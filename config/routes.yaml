@@ -23,7 +23,7 @@ app_resend_otp:
     path: /resend-otp
     controller: App\Controller\VerificationController::resendOtp
     methods: [GET]
- 
+
 app_login:
     path: /login
     controller: App\Controller\SecurityController::login
@@ -99,3 +99,32 @@ app_admin_product_delete:
     path: /admin/product/{id}
     controller: App\Controller\Admin\ProductController::delete
     methods: [POST]
+
+# Checkout Routes
+app_checkout:
+    path: /checkout
+    controller: App\Controller\CheckoutController::index
+    methods: [GET, POST]
+
+app_order_stripe_success:
+    path: /order/stripe/success
+    controller: App\Controller\CheckoutController::stripeSuccess
+    methods: [GET]
+
+app_order_stripe_cancel:
+    path: /order/stripe/cancel
+    controller: App\Controller\CheckoutController::stripeCancel
+    methods: [GET]
+
+# CORRECTED: Point the confirmation route to the OrderController
+app_order_confirmation:
+    path: /order/confirmation/{reference}
+    controller: App\Controller\OrderController::confirmation # <-- Corrected controller
+    methods: [GET]
+
+
+# ADDED: Route for downloading the invoice PDF
+app_order_download_invoice:
+    path: /order/{reference}/invoice
+    controller: App\Controller\OrderController::downloadInvoice
+    methods: [GET]

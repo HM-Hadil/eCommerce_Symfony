@@ -85,12 +85,11 @@
                     </div>
                     <div class="card-footer">
                         <div class="d-flex gap-2">
-                            <a href="{{ path('app_home', {'id': product.id}) }}" class="btn btn-primary flex-grow-1">Voir détails</a>
                             <form action="{{ path('app_cart_add', {'id': product.id}) }}" method="post" class="flex-grow-1">
                                 <div class="input-group">
                                     <input type="number" name="quantity" value="1" min="1" max="{{ product.stock }}" class="form-control form-control-sm">
                                     <button type="submit" class="btn btn-success">
-                                        <i class="fas fa-cart-plus"></i>
+                                       ajouter au panier
                                     </button>
                                 </div>
                             </form>
