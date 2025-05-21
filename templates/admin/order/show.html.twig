@@ -43,7 +43,7 @@
                             <tbody>
                                 {% for item in order.orderItems %}
                                     <tr>
-                                        <td>{{ item.name }}</td>
+                                        <td>{{ item.productName }}</td>
                                         <td class="text-center">{{ item.price|format_currency('EUR') }}</td>
                                         <td class="text-center">{{ item.quantity }}</td>
                                         <td class="text-center">{{ item.subtotal|format_currency('EUR') }}</td>
@@ -68,13 +68,9 @@
                             <h5 class="mb-0">Adresse de livraison</h5>
                         </div>
                         <div class="card-body">
-                            <p class="mb-1">{{ order.shippingAddress.firstName }} {{ order.shippingAddress.lastName }}</p>
-                            <p class="mb-1">{{ order.shippingAddress.street }}</p>
-                            {% if order.shippingAddress.street2 %}
-                                <p class="mb-1">{{ order.shippingAddress.street2 }}</p>
-                            {% endif %}
-                            <p class="mb-1">{{ order.shippingAddress.zipCode }} {{ order.shippingAddress.city }}</p>
-                            <p class="mb-0">{{ order.shippingAddress.country }}</p>
+                            <p class="mb-1">{{ order.shippingAddress }} {{ order.shippingAddress }}</p>
+                         
+                        
                         </div>
                     </div>
                 </div>
@@ -84,13 +80,9 @@
                             <h5 class="mb-0">Adresse de facturation</h5>
                         </div>
                         <div class="card-body">
-                            <p class="mb-1">{{ order.billingAddress.firstName }} {{ order.billingAddress.lastName }}</p>
-                            <p class="mb-1">{{ order.billingAddress.street }}</p>
-                            {% if order.billingAddress.street2 %}
-                                <p class="mb-1">{{ order.billingAddress.street2 }}</p>
-                            {% endif %}
-                            <p class="mb-1">{{ order.billingAddress.zipCode }} {{ order.billingAddress.city }}</p>
-                            <p class="mb-0">{{ order.billingAddress.country }}</p>
+                            <p class="mb-1">{{ order.billingAddress }} {{ order.billingAddress }}</p>
+                           
+                          
                         </div>
                     </div>
                 </div>
@@ -132,12 +124,7 @@
                         </div>
                     {% endif %}
                     
-                    {% if order.notes %}
-                        <div class="mb-3">
-                            <h6>Notes</h6>
-                            <p class="mb-0">{{ order.notes }}</p>
-                        </div>
-                    {% endif %}
+                  
                 </div>
             </div>
             
@@ -148,7 +135,6 @@
                 <div class="card-body">
                     {{ form_start(form) }}
                     {{ form_row(form.status) }}
-                    {{ form_row(form.notes) }}
                     <button type="submit" class="btn btn-primary">Mettre à jour</button>
                     {{ form_end(form) }}
                 </div>

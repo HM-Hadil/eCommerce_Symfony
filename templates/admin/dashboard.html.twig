@@ -6,11 +6,11 @@
 {% block body %}
     <div class="bg-light p-4 rounded">
         <h1 class="display-6">Bienvenue, {{ app.user.email }}</h1>
-        <p class="lead">Gérez vos produits et catégories depuis ce tableau de bord.</p>
+        <p class="lead">Gérez vos produits, catégories et commandes depuis ce tableau de bord.</p>
     </div>
 
     <div class="row mt-4">
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-header bg-primary text-white">
                     <i class="fas fa-box me-2"></i>Produits
@@ -28,7 +28,7 @@
             </div>
         </div>
 
-        <div class="col-md-6">
+        <div class="col-md-4">
             <div class="card mb-4">
                 <div class="card-header bg-success text-white">
                     <i class="fas fa-list me-2"></i>Catégories
@@ -41,6 +41,21 @@
                     </a>
                     <a href="{{ path('app_admin_category_new') }}" class="btn btn-success">
                         <i class="fas fa-plus me-2"></i>Ajouter une catégorie
+                    </a>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-4">
+            <div class="card mb-4">
+                <div class="card-header bg-warning text-white">
+                    <i class="fas fa-shopping-cart me-2"></i>Commandes
+                </div>
+                <div class="card-body">
+                    <h5 class="card-title">Gestion des commandes</h5>
+                    <p class="card-text">Suivez et gérez les commandes de vos clients.</p>
+                    <a href="{{ path('app_admin_order_index') }}" class="btn btn-primary w-100">
+                        <i class="fas fa-list me-2"></i>Voir toutes les commandes
                     </a>
                 </div>
             </div>

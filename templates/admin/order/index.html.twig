@@ -76,7 +76,7 @@
                                 {{ order.total|format_currency('EUR') }}
                             </div>
                             <div class="col-md-2">
-                                <span class="badge bg-{{ order.status == 'cancelled' ? 'danger' : (order.status == 'delivered' ? 'success' : 'info') }}">
+                                <span class="badge bg-{{ order.paymentStatus == 'cancelled' ? 'danger' : (order.status == 'delivered' ? 'success' : 'info') }}">
                                     {{ order.statusLabel }}
                                 </span>
                             </div>

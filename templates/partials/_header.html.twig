@@ -1,0 +1,64 @@
+{# templates/partials/_header.html.twig #}
+
+<header>
+    <nav>
+        <ul>
+            {# Home Link #}
+            <li><a href="{{ path('app_home') }}">Accueil</a></li>
+
+            {# Product List Link #}
+            <li><a href="{{ path('app_product_index') }}">Liste des Produits</a></li>
+
+            {# Links visible only to authenticated users #}
+            {% if app.user %}
+                {# Cart Link #}
+                <li><a href="{{ path('app_cart_index') }}">Panier</a></li>
+
+                {# Orders Link #}
+                <li><a href="{{ path('app_order_index') }}">Mes Commandes</a></li>
+
+                {# Logout Link #}
+                <li><a href="{{ path('app_logout') }}">Déconnexion</a></li>
+            {% else %}
+                {# Links visible only to anonymous users #}
+                {# Assuming you have these routes for login/register #}
+                <li><a href="{{ path('app_login') }}">Connexion</a></li>
+                {% if not app.user %} {# You might want to show register even if login link is there #}
+                     <li><a href="{{ path('app_register') }}">Inscription</a></li>
+                {% endif %}
+            {% endif %}
+        </ul>
+    </nav>
+</header>
+
+<style>
+    /* Basic styling for the header - you should ideally put this in a separate CSS file */
+    header {
+        background-color: #f8f9fa; /* Light gray background */
+        padding: 10px 20px;
+        border-bottom: 1px solid #e9ecef;
+    }
+
+    nav ul {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+        display: flex; /* Use flexbox for horizontal layout */
+        gap: 20px; /* Space between links */
+    }
+
+    nav ul li {
+        display: inline; /* Ensure list items are inline */
+    }
+
+    nav ul li a {
+        text-decoration: none;
+        color: #007bff; /* Bootstrap primary blue color */
+        font-weight: bold;
+    }
+
+    nav ul li a:hover {
+        text-decoration: underline;
+        color: #0056b3; /* Darker blue on hover */
+    }
+</style>

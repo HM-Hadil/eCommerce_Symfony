@@ -74,6 +74,8 @@ class Order
     private ?\DateTimeImmutable $paidAt = null;
 
     // Add other timestamps if needed (shippedAt, deliveredAt)
+#[ORM\Column(type: 'text', nullable: true)]
+private ?string $notes = null;
 
 
     public function __construct()
@@ -96,6 +98,15 @@ class Order
         return $this->id;
     }
 
+    public function getNotes(): ?string
+{
+    return $this->notes;
+}
+public function setNotes(?string $notes): self
+{
+    $this->notes = $notes;
+    return $this;
+}
     public function getReference(): ?string
     {
         return $this->reference;

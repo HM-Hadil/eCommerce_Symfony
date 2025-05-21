@@ -1,36 +1,4 @@
-{# templates/registration/register.html.twig #}
-{% extends 'base.html.twig' %}
-
-{% block title %}Inscription{% endblock %}
-
-{% block body %}
-    <h3>Inscription</h3>
-
-    {% for flash_error in app.flashes('error') %}
-        <div class="alert alert-danger">{{ flash_error }}</div>
-    {% endfor %}
-
-    {% for flash_success in app.flashes('success') %}
-        <div class="alert alert-success">{{ flash_success }}</div>
-    {% endfor %}
-
-    {# Wrap the form in a div for styling #}
-    <div class="registration-form-container">
-        {{ form_start(registrationForm, {'attr': {'method': 'POST'}}) }}
-            {# form_row generates div, label, input, and error messages by default #}
-            {{ form_row(registrationForm.email) }}
-            {{ form_row(registrationForm.password) }}
-            {{ form_row(registrationForm.phoneNumber) }}
-            {{ form_row(registrationForm.roleChoice) }} {# This is a ChoiceType rendered as radio buttons #}
-            {{ form_row(registrationForm.submit) }}
-        {{ form_end(registrationForm) }}
-    </div>
-
-   
-    {% block stylesheets %}
-        {{ parent() }}
-        <style>
-        /* styles.css or form.css */
+/* styles.css or form.css */
 
 /* Container for the registration form */
 .registration-form-container {
@@ -128,8 +96,3 @@
     background-color: #d4edda;
     border-color: #c3e6cb;
 }
-        </style>
-    {% endblock %}
-    
-
-{% endblock %}

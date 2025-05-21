@@ -128,3 +128,24 @@ app_order_download_invoice:
     path: /order/{reference}/invoice
     controller: App\Controller\OrderController::downloadInvoice
     methods: [GET]
+
+# Admin Order Routes
+app_admin_order_index:
+    path: /admin/order
+    controller: App\Controller\Admin\OrderController::index
+    methods: [GET]
+
+app_admin_order_show:
+    path: /admin/order/{id}
+    controller: App\Controller\Admin\OrderController::show
+    methods: [GET, POST]
+
+app_admin_order_update_status:
+    path: /admin/order/{id}/update-status
+    controller: App\Controller\Admin\OrderController::updateStatus
+    methods: [POST]
+
+app_admin_order_resend_confirmation:
+    path: /admin/order/{id}/resend-confirmation
+    controller: App\Controller\Admin\OrderController::resendConfirmation
+    methods: [POST]

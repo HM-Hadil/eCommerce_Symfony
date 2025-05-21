@@ -3,6 +3,8 @@
 {% block title %}Détails de la commande{% endblock %}
 
 {% block body %}
+        {% include 'partials/_header.html.twig' %}
+
 <div class="container my-5">
     <div class="d-flex justify-content-between align-items-center mb-4">
         <h1>Commande #{{ order.reference }}</h1>
@@ -125,7 +127,7 @@
                     </div>
                 </div>
             </div>
-
+  <h6>status: {{order.status}}</h6>
             {% if order.paymentStatus == 'pending' %} {# Use paymentStatus property #}
                 <div class="card mb-4">
                     <div class="card-header bg-warning text-dark">

@@ -1,7 +1,7 @@
-{% extends 'base.html.twig' %}
+{# templates/product/index.html.twig #}
+{% extends 'base.html.twig' %} {# Assuming you have a base layout file #}
 
-{% block title %}Accueil{% endblock %}
-
+{% block title %}Liste des Produits{% endblock %}
 {% block body %}
         {% include 'partials/_header.html.twig' %}
 
@@ -11,45 +11,12 @@
     <div class="row mb-4">
         <div class="col-md-8">
             <form method="get" action="{{ path('app_home') }}" class="d-flex">
-                <input type="text" name="search" value="{{ search }}" class="form-control me-2" placeholder="Rechercher un produit...">
                 <button type="submit" class="btn btn-primary">Rechercher</button>
             </form>
         </div>
-        <div class="col-md-4">
-            <div class="dropdown">
-                <button class="btn btn-secondary dropdown-toggle w-100" type="button" id="dropdownMenuButton" data-bs-toggle="dropdown" aria-expanded="false">
-                    {% if currentCategory %}
-                        {{ currentCategory.name }}
-                    {% else %}
-                        Toutes les catégories
-                    {% endif %}
-                </button>
-                <ul class="dropdown-menu w-100" aria-labelledby="dropdownMenuButton">
-                    <li><a class="dropdown-item" href="{{ path('app_home', {'search': search}) }}">Toutes les catégories</a></li>
-                    {% for category in categories %}
-                        <li><a class="dropdown-item" href="{{ path('app_home', {'category': category.id, 'search': search}) }}">{{ category.name }}</a></li>
-                    {% endfor %}
-                </ul>
-            </div>
-        </div>
+   
     </div>
 
-    <!-- Indicateur de filtres actifs -->
-    {% if currentCategory or search %}
-        <div class="alert alert-info mb-4 d-flex justify-content-between align-items-center">
-            <div>
-                <span class="fw-bold">Filtres actifs:</span> 
-                {% if currentCategory %}
-                    Catégorie: <strong>{{ currentCategory.name }}</strong>
-                {% endif %}
-                {% if search %}
-                    {% if currentCategory %} | {% endif %}
-                    Recherche: <strong>{{ search }}</strong>
-                {% endif %}
-            </div>
-            <a href="{{ path('app_home') }}" class="btn btn-sm btn-outline-secondary">Réinitialiser</a>
-        </div>
-    {% endif %}
 
     <!-- Message flash -->
     {% for message in app.flashes('success') %}
